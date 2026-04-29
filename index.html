@@ -7,48 +7,34 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --accent: #00e676;
-    --accent2: #69f0ae;
-    --text: #f0f0f0;
-    --muted: #888;
-    --danger: #ff5252;
-    --warn: #ffeb3b;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+    --border: #2e2e2e; --accent: #00e676; --accent2: #69f0ae;
+    --text: #f0f0f0; --muted: #888; --danger: #ff5252;
+    --radius: 12px; --radius-sm: 8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
-  body { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
 
-  header {
-    width: 100%; max-width: 480px;
-    padding: 1.25rem 1.25rem 0.75rem;
-    display: flex; align-items: center; gap: 10px;
-  }
+  header { padding: 1.25rem 1.25rem 0.75rem; display: flex; align-items: center; gap: 10px; }
   .logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .logo svg { width: 18px; height: 18px; fill: #000; }
-  header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+  header h1 { font-size: 16px; font-weight: 600; color: var(--text); }
   header small { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
 
-  main { width: 100%; max-width: 480px; padding: 0.75rem 1.25rem 2rem; flex: 1; }
+  main { padding: 0 1.25rem 2rem; }
 
-  /* Camera */
-  #cam-wrap {
+  #viewport {
     width: 100%; aspect-ratio: 4/3; border-radius: var(--radius);
     background: #111; overflow: hidden; position: relative;
     border: 1px solid var(--border); margin-bottom: 0.75rem; display: none;
   }
-  #cam-wrap.active { display: block; }
-  #video { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .scan-corners { position: absolute; inset: 0; pointer-events: none; }
-  .scan-corners::before, .scan-corners::after,
-  .c2::before, .c2::after {
-    content: ''; position: absolute;
-    width: 22px; height: 22px;
+  #viewport.active { display: block; }
+  #viewport video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; position: absolute !important; top:0 !important; left:0 !important; }
+  #viewport canvas { display: none !important; }
+
+  .scan-corners { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .scan-corners::before, .scan-corners::after, .c2::before, .c2::after {
+    content: ''; position: absolute; width: 22px; height: 22px;
     border-color: var(--accent); border-style: solid;
   }
   .scan-corners::before { top: 14px; left: 14px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
@@ -56,49 +42,41 @@
   .c2::before { bottom: 14px; left: 14px; border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
   .c2::after  { bottom: 14px; right: 14px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
   #scan-line {
-    position: absolute; left: 12%; right: 12%; height: 2px;
-    background: var(--accent); top: 20%;
-    box-shadow: 0 0 8px var(--accent);
+    position: absolute; left: 12%; right: 12%; height: 2px; z-index: 11;
+    background: var(--accent); top: 20%; box-shadow: 0 0 8px var(--accent);
     animation: sweep 2s ease-in-out infinite;
   }
   @keyframes sweep { 0%,100% { top: 15%; } 50% { top: 82%; } }
 
-  /* Buttons */
   .btn {
     width: 100%; padding: 13px 16px; border-radius: var(--radius-sm);
     font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
     cursor: pointer; border: 1px solid var(--border);
     background: var(--surface); color: var(--text);
-    transition: background 0.15s, transform 0.1s;
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   .btn:active { transform: scale(0.97); }
   .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
-  .btn.primary:active { background: var(--accent2); }
-  .btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
   .btn.stop { background: #1e1e1e; color: var(--danger); border-color: #3a1a1a; }
   #cam-btn { margin-bottom: 0.75rem; }
 
-  /* Status */
   #status {
-    padding: 10px 14px; border-radius: var(--radius-sm);
-    font-size: 13px; display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
     background: var(--surface); border: 1px solid var(--border);
     margin-bottom: 0.75rem; min-height: 42px;
   }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .dot.on { background: var(--accent); animation: blink 1.2s ease-in-out infinite; }
-  .dot.ok { background: var(--accent); animation: none; }
-  .dot.err { background: var(--danger); animation: none; }
+  .dot.on  { background: var(--accent); animation: blink 1.2s ease-in-out infinite; }
+  .dot.ok  { background: var(--accent); }
+  .dot.err { background: var(--danger); }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* Manual input */
   .input-row { display: flex; gap: 8px; margin-bottom: 0.75rem; }
   input[type=text] {
     flex: 1; padding: 11px 14px; border-radius: var(--radius-sm);
     background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px;
-    outline: none;
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; outline: none;
   }
   input[type=text]:focus { border-color: var(--accent); }
   input[type=text]::placeholder { color: var(--muted); }
@@ -106,29 +84,19 @@
     padding: 11px 16px; border-radius: var(--radius-sm);
     background: var(--surface2); border: 1px solid var(--border);
     color: var(--text); font-size: 13px; font-weight: 500;
-    cursor: pointer; white-space: nowrap;
-    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap;
   }
   .add-btn:active { transform: scale(0.97); }
 
-  /* List */
-  .list-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
+  .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
   .list-header span { font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .badge {
-    font-size: 11px; font-family: 'DM Mono', monospace;
-    padding: 2px 10px; border-radius: 99px;
-    background: var(--surface2); color: var(--muted);
-    border: 1px solid var(--border);
-  }
+  .badge { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 10px; border-radius: 99px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
   .clear-lnk { font-size: 12px; color: var(--danger); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
   #list {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); overflow: hidden;
-    max-height: 280px; overflow-y: auto;
+    max-height: 260px; overflow-y: auto;
     margin-bottom: 0.75rem;
     scrollbar-width: thin; scrollbar-color: var(--border) transparent;
   }
@@ -142,27 +110,17 @@
   .row:last-child { border-bottom: none; }
   .num { width: 22px; height: 22px; border-radius: 50%; background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .code { flex: 1; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); word-break: break-all; }
-  .tag {
-    font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 99px;
-    flex-shrink: 0; letter-spacing: 0.3px;
-  }
+  .tag { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 99px; flex-shrink: 0; letter-spacing: 0.3px; }
   .tag-isbn { background: #0d2a4a; color: #64b5f6; }
   .tag-qr   { background: #1a0d3a; color: #ce93d8; }
   .tag-bar  { background: #0d2a1a; color: #81c784; }
   .del { background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
-  .del:hover { color: var(--danger); }
 
-  /* Export */
   .export-row { display: flex; gap: 8px; }
   .export-row .btn { flex: 1; }
 
-  /* Flash */
   #flash { position: fixed; inset: 0; background: rgba(0,230,118,0.15); pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 99; }
   #flash.show { opacity: 1; transition: none; }
-
-  @media (min-width: 500px) {
-    main, header { padding-left: 2rem; padding-right: 2rem; }
-  }
 </style>
 </head>
 <body>
@@ -170,11 +128,7 @@
 
 <header>
   <div class="logo">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="3" width="2" height="18"/><rect x="7" y="3" width="1" height="18"/>
-      <rect x="10" y="3" width="3" height="18"/><rect x="15" y="3" width="1" height="18"/>
-      <rect x="18" y="3" width="3" height="18"/>
-    </svg>
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="2" height="18"/><rect x="7" y="3" width="1" height="18"/><rect x="10" y="3" width="3" height="18"/><rect x="15" y="3" width="1" height="18"/><rect x="18" y="3" width="3" height="18"/></svg>
   </div>
   <div>
     <h1>Escáner de Códigos</h1>
@@ -185,8 +139,7 @@
 <main>
   <button class="btn" id="cam-btn" onclick="toggleCam()">📷 Activar cámara</button>
 
-  <div id="cam-wrap">
-    <video id="video" autoplay playsinline muted></video>
+  <div id="viewport">
     <div class="scan-corners"><div class="c2"></div></div>
     <div id="scan-line"></div>
   </div>
@@ -194,7 +147,7 @@
   <div id="status"><div class="dot" id="dot"></div><span id="stxt">Listo — activa la cámara o ingresa manualmente</span></div>
 
   <div class="input-row">
-    <input type="text" id="manual" placeholder="ISBN, código de barras..." inputmode="numeric" />
+    <input type="text" id="manual" placeholder="ISBN o código de barras..." inputmode="numeric" />
     <button class="add-btn" onclick="addManual()">+ Agregar</button>
   </div>
 
@@ -211,20 +164,20 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/zxing-js@0.19.1/library/umd/zxing-js.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <script>
-let items = [], camOn = false, stream = null, scanning = false;
+let items = [], camOn = false, lastCode = '', lastTime = 0;
 
 function setStatus(msg, type) {
   document.getElementById('stxt').textContent = msg;
   const d = document.getElementById('dot');
-  d.className = 'dot' + (type === 'on' ? ' on' : type === 'ok' ? ' ok' : type === 'err' ? ' err' : '');
+  d.className = 'dot' + (type==='on' ? ' on' : type==='ok' ? ' ok' : type==='err' ? ' err' : '');
 }
 
 function detectType(c) {
   const n = c.replace(/\D/g,'');
-  if ((n.length===13 && (n.startsWith('978')||n.startsWith('979')))||n.length===10) return 'ISBN';
-  if (c.startsWith('http')||c.startsWith('https')||(c.length>25&&/[a-zA-Z]/.test(c))) return 'QR';
+  if ((n.length===13 && (n.startsWith('978')||n.startsWith('979'))) || n.length===10) return 'ISBN';
+  if (c.startsWith('http') || c.startsWith('https') || (c.length>25 && /[a-zA-Z]/.test(c))) return 'QR';
   return 'BAR';
 }
 
@@ -236,19 +189,18 @@ function addCode(code) {
   const ts = new Date().toLocaleString('es-MX');
   items.push({ code, type, ts, id: Date.now() });
   render();
-  setStatus('✓ '+code.slice(0,30), 'ok');
+  setStatus('✓ Guardado: '+code, 'ok');
   document.getElementById('manual').value = '';
-  flash();
-}
-
-function flash() {
   const f = document.getElementById('flash');
   f.classList.add('show');
-  setTimeout(()=>f.classList.remove('show'), 150);
+  setTimeout(()=>f.classList.remove('show'), 200);
 }
 
 function removeItem(id) { items = items.filter(i=>i.id!==id); render(); }
-function clearAll() { if(items.length&&confirm('¿Limpiar todos los códigos?')) { items=[]; render(); setStatus('Lista limpiada',''); } }
+
+function clearAll() {
+  if (items.length && confirm('¿Limpiar todos los códigos?')) { items=[]; render(); setStatus('Lista limpiada',''); }
+}
 
 function render() {
   document.getElementById('cnt').textContent = items.length;
@@ -257,19 +209,17 @@ function render() {
   list.innerHTML = items.map((item,i)=>`
     <div class="row">
       <div class="num">${i+1}</div>
-      <div class="code">${escHtml(item.code)}</div>
+      <div class="code">${item.code.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
       <span class="tag ${item.type==='ISBN'?'tag-isbn':item.type==='QR'?'tag-qr':'tag-bar'}">${item.type}</span>
       <button class="del" onclick="removeItem(${item.id})">✕</button>
     </div>`).join('');
 }
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
 function exportCSV() {
   if (!items.length) { alert('No hay códigos para exportar'); return; }
-  const rows = [['N°','Código','Tipo','Fecha/Hora'],...items.map((it,i)=>[i+1,it.code,it.type,it.ts])];
+  const rows = [['N°','Código','Tipo','Fecha/Hora'], ...items.map((it,i)=>[i+1,it.code,it.type,it.ts])];
   const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href=url; a.download='codigos_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -279,86 +229,100 @@ function exportCSV() {
 
 function copyTSV() {
   if (!items.length) { alert('No hay códigos para copiar'); return; }
-  const rows = [['N°','Código','Tipo','Fecha/Hora'],...items.map((it,i)=>[i+1,it.code,it.type,it.ts])];
+  const rows = [['N°','Código','Tipo','Fecha/Hora'], ...items.map((it,i)=>[i+1,it.code,it.type,it.ts])];
   navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n'))
-    .then(()=>setStatus('Copiado — pega en Excel/Sheets con Ctrl+V','ok'))
+    .then(()=>setStatus('Copiado — pega en Excel con Ctrl+V','ok'))
     .catch(()=>setStatus('Error al copiar','err'));
 }
 
-async function toggleCam() {
-  const btn = document.getElementById('cam-btn');
-  const wrap = document.getElementById('cam-wrap');
-  if (camOn) {
-    stopCam();
-    btn.innerHTML='📷 Activar cámara';
-    btn.className='btn';
-    wrap.classList.remove('active');
-    setStatus('Cámara detenida','');
-    return;
-  }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
-    const v = document.getElementById('video');
-    v.srcObject = stream;
-    wrap.classList.add('active');
-    btn.innerHTML='⏹ Detener cámara';
-    btn.className='btn stop';
-    camOn = true;
-    setStatus('Cámara activa — apunta al código','on');
-    startScan(v);
-  } catch(e) {
-    setStatus('Sin acceso a cámara — usa entrada manual','err');
-  }
+function startQuagga() {
+  Quagga.init({
+    inputStream: {
+      name: 'Live',
+      type: 'LiveStream',
+      target: document.getElementById('viewport'),
+      constraints: {
+        facingMode: 'environment',
+        width: { min: 640, ideal: 1280, max: 1920 },
+        height: { min: 480, ideal: 720, max: 1080 }
+      },
+      area: { top: '15%', right: '5%', left: '5%', bottom: '15%' }
+    },
+    decoder: {
+      readers: [
+        'ean_reader',
+        'ean_8_reader',
+        'upc_reader',
+        'upc_e_reader',
+        'code_128_reader',
+        'code_39_reader'
+      ],
+      multiple: false
+    },
+    locate: true,
+    numOfWorkers: 2,
+    frequency: 15
+  }, function(err) {
+    if (err) {
+      console.error(err);
+      setStatus('Error al iniciar cámara', 'err');
+      stopCam();
+      return;
+    }
+    Quagga.start();
+    setStatus('Cámara activa — apunta al código de barras', 'on');
+  });
+
+  Quagga.onDetected(function(result) {
+    if (!result || !result.codeResult) return;
+    const code = result.codeResult.code;
+    if (!code || code.length < 6) return;
+
+    // Filtrar por confianza
+    const errors = result.codeResult.decodedCodes
+      .filter(x => x.error !== undefined)
+      .map(x => x.error);
+    if (errors.length > 0) {
+      const avgErr = errors.reduce((a,b)=>a+b,0) / errors.length;
+      if (avgErr > 0.3) return;
+    }
+
+    const now = Date.now();
+    if (code === lastCode && now - lastTime < 2500) return;
+    lastCode = code;
+    lastTime = now;
+    addCode(code);
+  });
 }
 
 function stopCam() {
-  camOn = false; scanning = false;
-  if (stream) { stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  camOn = false;
+  try { Quagga.stop(); } catch(e){}
+  const vp = document.getElementById('viewport');
+  vp.classList.remove('active');
+  vp.innerHTML = '<div class="scan-corners"><div class="c2"></div></div><div id="scan-line"></div>';
+  document.getElementById('cam-btn').innerHTML = '📷 Activar cámara';
+  document.getElementById('cam-btn').className = 'btn';
 }
 
-function startScan(video) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  let last='', lastT=0;
-  scanning = true;
-
-  function tick() {
-    if (!camOn || !scanning) return;
-    if (video.readyState===4) {
-      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-      ctx.drawImage(video,0,0);
-      try {
-        if (window.ZXing) {
-          const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-          const lum = new ZXing.RGBLuminanceSource(img.data,canvas.width,canvas.height);
-          const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-          const hints = new Map();
-          hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
-            ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
-            ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
-            ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.QR_CODE,
-            ZXing.BarcodeFormat.DATA_MATRIX
-          ]);
-          const reader = new ZXing.MultiFormatReader();
-          reader.setHints(hints);
-          const res = reader.decode(bmp);
-          if (res) {
-            const code = res.getText();
-            const now = Date.now();
-            if (code!==last || now-lastT>3000) {
-              last=code; lastT=now;
-              addCode(code);
-            }
-          }
-        }
-      } catch(e){}
-    }
-    requestAnimationFrame(tick);
+async function toggleCam() {
+  if (camOn) { stopCam(); setStatus('Cámara detenida',''); return; }
+  try {
+    const test = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    test.getTracks().forEach(t => t.stop());
+  } catch(e) {
+    setStatus('Sin acceso a cámara — permite el permiso en Safari/Chrome', 'err');
+    return;
   }
-  tick();
+  document.getElementById('viewport').classList.add('active');
+  document.getElementById('cam-btn').innerHTML = '⏹ Detener cámara';
+  document.getElementById('cam-btn').className = 'btn stop';
+  camOn = true;
+  setStatus('Iniciando cámara...', '');
+  startQuagga();
 }
 
-document.getElementById('manual').addEventListener('keydown', e=>{ if(e.key==='Enter') addManual(); });
+document.getElementById('manual').addEventListener('keydown', e => { if(e.key==='Enter') addManual(); });
 function addManual() { addCode(document.getElementById('manual').value); }
 </script>
 </body>
