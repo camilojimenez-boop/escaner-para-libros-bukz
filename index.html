@@ -184,7 +184,7 @@ function detectType(c) {
 function addCode(code) {
   code = code.trim();
   if (!code) return;
-  if (items.find(i=>i.code===code)) { setStatus('Ya registrado: '+code.slice(0,22), 'err'); return; }
+
   const type = detectType(code);
   const ts = new Date().toLocaleString('es-MX');
   items.push({ code, type, ts, id: Date.now() });
