@@ -166,7 +166,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <script>
-let items = [], camOn = false, lastCode = '', lastTime = 0;
+let items = [], camOn = false, lastCode = '', lastTime = 0, scanLocked = false;
 
 function setStatus(msg, type) {
   document.getElementById('stxt').textContent = msg;
@@ -229,9 +229,9 @@ function exportCSV() {
 
 function copyTSV() {
   if (!items.length) { alert('No hay códigos para copiar'); return; }
-  const rows = [['N°','Código','Tipo','Fecha/Hora'], ...items.map((it,i)=>[i+1,it.code,it.type,it.ts])];
-  navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n'))
-    .then(()=>setStatus('Copiado — pega en Excel con Ctrl+V','ok'))
+  const text = items.map(it => it.code).join('\n');
+  navigator.clipboard.writeText(text)
+    .then(()=>setStatus('Copiado — pega en Excel o WhatsApp','ok'))
     .catch(()=>setStatus('Error al copiar','err'));
 }
 
@@ -287,11 +287,21 @@ function startQuagga() {
       if (avgErr > 0.3) return;
     }
 
-    const now = Date.now();
-    if (code === lastCode && now - lastTime < 2500) return;
-    lastCode = code;
-    lastTime = now;
+    if (scanLocked) return;
+    scanLocked = true;
     addCode(code);
+    let secs = 3;
+    setStatus('⏳ Siguiente escaneo en ' + secs + 's...', 'on');
+    const iv = setInterval(() => {
+      secs--;
+      if (secs > 0) {
+        setStatus('⏳ Siguiente escaneo en ' + secs + 's...', 'on');
+      } else {
+        clearInterval(iv);
+        scanLocked = false;
+        setStatus('Listo — apunta al siguiente código', 'on');
+      }
+    }, 1000);
   });
 }
 
