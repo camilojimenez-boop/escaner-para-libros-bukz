@@ -8,7 +8,7 @@
 <style>
   :root {
     --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
-    --border: #2e2e2e; --accent: #00e676; --accent2: #69f0ae;
+    --border: #2e2e2e; --accent: #00e676;
     --text: #f0f0f0; --muted: #888; --danger: #ff5252;
     --radius: 12px; --radius-sm: 8px;
   }
@@ -47,6 +47,13 @@
     animation: sweep 2s ease-in-out infinite;
   }
   @keyframes sweep { 0%,100% { top: 15%; } 50% { top: 82%; } }
+
+  /* Hint para etiquetas rotadas */
+  #rotate-hint {
+    position: absolute; bottom: 10px; left: 0; right: 0; z-index: 12;
+    text-align: center; font-size: 11px; color: rgba(255,255,255,0.7);
+    pointer-events: none;
+  }
 
   .btn {
     width: 100%; padding: 13px 16px; border-radius: var(--radius-sm);
@@ -93,11 +100,7 @@
   .badge { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 10px; border-radius: 99px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
   .clear-lnk { font-size: 12px; color: var(--danger); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-  /* Saved indicator */
-  #saved-info {
-    font-size: 11px; color: var(--muted); text-align: center;
-    margin-bottom: 0.5rem; display: none;
-  }
+  #saved-info { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 0.5rem; display: none; }
   #saved-info.visible { display: block; }
 
   #list {
@@ -145,6 +148,7 @@
   <div id="viewport">
     <div class="scan-corners"><div class="c2"></div></div>
     <div id="scan-line"></div>
+    <div id="rotate-hint">Si no lee, gira el celular horizontalmente 🔄</div>
   </div>
 
   <div id="status"><div class="dot" id="dot"></div><span id="stxt">Cargando datos guardados...</span></div>
@@ -159,7 +163,7 @@
     <button class="clear-lnk" onclick="clearAll()">Limpiar todo</button>
   </div>
 
-  <div id="saved-info" id="saved-info">💾 Datos guardados en este dispositivo</div>
+  <div id="saved-info">💾 Datos guardados en este dispositivo</div>
 
   <div id="list"><div id="empty">Sin escaneos aún</div></div>
 
@@ -174,19 +178,13 @@
 const STORAGE_KEY = 'bukz_isbn_items';
 let items = [], camOn = false, scanLocked = false;
 
-// --- Persistencia ---
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e){}
 }
-
 function load() {
-  try {
-    const d = localStorage.getItem(STORAGE_KEY);
-    if (d) items = JSON.parse(d);
-  } catch(e) { items = []; }
+  try { const d = localStorage.getItem(STORAGE_KEY); if (d) items = JSON.parse(d); } catch(e) { items = []; }
 }
 
-// --- Init: cargar datos al abrir ---
 load();
 render();
 if (items.length > 0) {
@@ -196,11 +194,10 @@ if (items.length > 0) {
   setStatus('Listo — activa la cámara o ingresa manualmente', '');
 }
 
-// --- Helpers ---
 function setStatus(msg, type) {
   document.getElementById('stxt').textContent = msg;
   const d = document.getElementById('dot');
-  d.className = 'dot' + (type==='on' ? ' on' : type==='ok' ? ' ok' : type==='err' ? ' err' : '');
+  d.className = 'dot' + (type==='on'?' on':type==='ok'?' ok':type==='err'?' err':'');
 }
 
 function addCode(code) {
@@ -218,17 +215,11 @@ function addCode(code) {
   setTimeout(()=>f.classList.remove('show'), 200);
 }
 
-function removeItem(id) {
-  items = items.filter(i=>i.id!==id);
-  save();
-  render();
-}
+function removeItem(id) { items = items.filter(i=>i.id!==id); save(); render(); }
 
 function clearAll() {
-  if (items.length && confirm('¿Limpiar todos los ISBN? Esta acción no se puede deshacer.')) {
-    items = [];
-    save();
-    render();
+  if (items.length && confirm('¿Limpiar todos los ISBN? No se puede deshacer.')) {
+    items = []; save(); render();
     setStatus('Lista limpiada', '');
     document.getElementById('saved-info').classList.remove('visible');
   }
@@ -244,7 +235,6 @@ function render() {
       <div class="code">${item.code.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
       <button class="del" onclick="removeItem(${item.id})">✕</button>
     </div>`).join('');
-  // Scroll al último
   list.scrollTop = list.scrollHeight;
 }
 
@@ -261,13 +251,11 @@ function exportCSV() {
 
 function copyCodes() {
   if (!items.length) { alert('No hay ISBN para copiar'); return; }
-  const text = items.map(it=>it.code).join('\n');
-  navigator.clipboard.writeText(text)
+  navigator.clipboard.writeText(items.map(it=>it.code).join('\n'))
     .then(()=>setStatus('Copiado — pega en Excel o WhatsApp', 'ok'))
     .catch(()=>setStatus('Error al copiar', 'err'));
 }
 
-// --- Quagga scanner ---
 function startQuagga() {
   Quagga.init({
     inputStream: {
@@ -276,39 +264,44 @@ function startQuagga() {
       target: document.getElementById('viewport'),
       constraints: {
         facingMode: 'environment',
-        width: { min: 640, ideal: 1280, max: 1920 },
-        height: { min: 480, ideal: 720, max: 1080 }
+        width: { min: 640, ideal: 1920, max: 2560 },
+        height: { min: 480, ideal: 1080, max: 1440 }
       },
-      area: { top: '15%', right: '5%', left: '5%', bottom: '15%' }
+      area: { top: '0%', right: '0%', left: '0%', bottom: '0%' }
     },
     decoder: {
       readers: ['ean_reader'],
       multiple: false
     },
+    locator: {
+      patchSize: 'large',
+      halfSample: false
+    },
     locate: true,
     numOfWorkers: 2,
-    frequency: 15
+    frequency: 20
   }, function(err) {
     if (err) { setStatus('Error al iniciar cámara', 'err'); stopCam(); return; }
     Quagga.start();
-    setStatus('Cámara activa — apunta al ISBN del libro', 'on');
+    setStatus('Cámara activa — apunta al código del libro', 'on');
   });
 
   Quagga.onDetected(function(result) {
     if (!result || !result.codeResult) return;
     const code = result.codeResult.code;
-    if (!code || code.length < 10) return;
+    if (!code) return;
 
-    // Solo ISBN (978/979 o 10 dígitos)
+    // Aceptar EAN-13 de 13 dígitos o ISBN-10 de 10 dígitos
     const n = code.replace(/\D/g,'');
-    const isISBN = (n.length===13 && (n.startsWith('978')||n.startsWith('979'))) || n.length===10;
-    if (!isISBN) return;
+    if (n.length !== 13 && n.length !== 10) return;
 
-    // Filtrar por confianza
-    const errors = result.codeResult.decodedCodes.filter(x=>x.error!==undefined).map(x=>x.error);
+    // Confianza más permisiva para etiquetas rotadas o con sticker
+    const errors = result.codeResult.decodedCodes
+      .filter(x => x.error !== undefined)
+      .map(x => x.error);
     if (errors.length > 0) {
       const avg = errors.reduce((a,b)=>a+b,0) / errors.length;
-      if (avg > 0.3) return;
+      if (avg > 0.5) return;
     }
 
     if (scanLocked) return;
@@ -335,7 +328,7 @@ function stopCam() {
   try { Quagga.stop(); } catch(e){}
   const vp = document.getElementById('viewport');
   vp.classList.remove('active');
-  vp.innerHTML = '<div class="scan-corners"><div class="c2"></div></div><div id="scan-line"></div>';
+  vp.innerHTML = '<div class="scan-corners"><div class="c2"></div></div><div id="scan-line"></div><div id="rotate-hint">Si no lee, gira el celular horizontalmente 🔄</div>';
   document.getElementById('cam-btn').innerHTML = '📷 Activar cámara';
   document.getElementById('cam-btn').className = 'btn';
 }
