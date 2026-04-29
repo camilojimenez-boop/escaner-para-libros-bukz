@@ -4,126 +4,82 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Escáner ISBN</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
-    --border: #2e2e2e; --accent: #00e676;
-    --text: #f0f0f0; --muted: #888; --danger: #ff5252;
-    --radius: 12px; --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+:root {
+  --bg:#0f0f0f; --card:#1a1a1a; --card2:#242424;
+  --border:#2e2e2e; --green:#00e676; --red:#ff5252;
+  --text:#f0f0f0; --muted:#777; --r:12px; --rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;max-width:480px;margin:0 auto;padding:1rem 1rem 3rem}
 
-  header { padding: 1.25rem 1.25rem 0.75rem; display: flex; align-items: center; gap: 10px; }
-  .logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .logo svg { width: 18px; height: 18px; fill: #000; }
-  header h1 { font-size: 16px; font-weight: 600; color: var(--text); }
-  header small { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+h1{font-size:17px;font-weight:600}
+small{font-size:11px;color:var(--muted)}
+header{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.logo{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:18px;height:18px;fill:#000}
 
-  main { padding: 0 1.25rem 2rem; }
+/* Video */
+#box{width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--r);overflow:hidden;position:relative;border:1px solid var(--border);display:none;margin-bottom:.75rem}
+#box.on{display:block}
+#vid{width:100%;height:100%;object-fit:cover;display:block}
+.line{position:absolute;left:8%;right:8%;height:2px;background:var(--green);box-shadow:0 0 8px var(--green);animation:sw 2s ease-in-out infinite;z-index:5}
+@keyframes sw{0%,100%{top:10%}50%{top:86%}}
+.cor{position:absolute;inset:0;pointer-events:none;z-index:6}
+.cor::before,.cor::after,.cor2::before,.cor2::after{content:'';position:absolute;width:22px;height:22px;border-color:var(--green);border-style:solid}
+.cor::before{top:12px;left:12px;border-width:3px 0 0 3px}
+.cor::after{top:12px;right:12px;border-width:3px 3px 0 0}
+.cor2::before{bottom:12px;left:12px;border-width:0 0 3px 3px}
+.cor2::after{bottom:12px;right:12px;border-width:0 3px 3px 0}
+#hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.6);z-index:7;pointer-events:none}
 
-  #cam-wrap {
-    width: 100%; aspect-ratio: 4/3; border-radius: var(--radius);
-    background: #111; overflow: hidden; position: relative;
-    border: 1px solid var(--border); margin-bottom: 0.75rem; display: none;
-  }
-  #cam-wrap.active { display: block; }
-  #preview {
-    width: 100%; height: 100%; object-fit: cover;
-    display: block; position: absolute; top: 0; left: 0;
-  }
-  .corners { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
-  .corners::before, .corners::after, .c2::before, .c2::after {
-    content: ''; position: absolute; width: 24px; height: 24px;
-    border-color: var(--accent); border-style: solid;
-  }
-  .corners::before { top: 12px; left: 12px; border-width: 3px 0 0 3px; }
-  .corners::after  { top: 12px; right: 12px; border-width: 3px 3px 0 0; }
-  .c2::before { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; }
-  .c2::after  { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; }
-  .scanline {
-    position: absolute; left: 8%; right: 8%; height: 2px; z-index: 11;
-    background: var(--accent); box-shadow: 0 0 8px var(--accent);
-    animation: sweep 2s ease-in-out infinite;
-  }
-  @keyframes sweep { 0%,100% { top: 10%; } 50% { top: 88%; } }
-  #cam-hint {
-    position: absolute; bottom: 8px; left: 0; right: 0; z-index: 12;
-    text-align: center; font-size: 11px; color: rgba(255,255,255,0.65); pointer-events: none;
-  }
+/* Status */
+#st{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;font-size:13px;margin-bottom:.75rem;min-height:42px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.on{background:var(--green);animation:bl 1s ease-in-out infinite}
+.dot.ok{background:var(--green)}
+.dot.err{background:var(--red)}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
 
-  .btn {
-    width: 100%; padding: 13px 16px; border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
-    cursor: pointer; border: 1px solid var(--border);
-    background: var(--surface); color: var(--text);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .btn:active { transform: scale(0.97); }
-  .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
-  .btn.stop { background: #1e1e1e; color: var(--danger); border-color: #3a1a1a; }
-  #cam-btn { margin-bottom: 0.75rem; }
+/* Buttons */
+.btn{width:100%;padding:13px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.75rem}
+.btn:active{transform:scale(.97)}
+.btn.green{background:var(--green);color:#000;border-color:var(--green)}
+.btn.red{background:#1e0a0a;color:var(--red);border-color:#4a1515}
 
-  #status {
-    padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px;
-    display: flex; align-items: center; gap: 10px;
-    background: var(--surface); border: 1px solid var(--border);
-    margin-bottom: 0.75rem; min-height: 42px;
-  }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .dot.on  { background: var(--accent); animation: blink 1s ease-in-out infinite; }
-  .dot.ok  { background: var(--accent); }
-  .dot.err { background: var(--danger); }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+/* Manual input */
+.row2{display:flex;gap:8px;margin-bottom:.75rem}
+input{flex:1;padding:11px 14px;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none}
+input:focus{border-color:var(--green)}
+input::placeholder{color:var(--muted)}
+.addbtn{padding:11px 16px;border-radius:var(--rs);background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.addbtn:active{transform:scale(.97)}
 
-  .input-row { display: flex; gap: 8px; margin-bottom: 0.75rem; }
-  input[type=text] {
-    flex: 1; padding: 11px 14px; border-radius: var(--radius-sm);
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; outline: none;
-  }
-  input[type=text]:focus { border-color: var(--accent); }
-  input[type=text]::placeholder { color: var(--muted); }
-  .add-btn {
-    padding: 11px 16px; border-radius: var(--radius-sm);
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); font-size: 13px; font-weight: 500;
-    cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap;
-  }
-  .add-btn:active { transform: scale(0.97); }
+/* List */
+.lh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+.lh span{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.badge{font-size:11px;font-family:'DM Mono',monospace;padding:2px 9px;border-radius:99px;background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+.clr{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
 
-  .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
-  .list-header span { font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .badge { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 10px; border-radius: 99px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-  .clear-lnk { font-size: 12px; color: var(--danger); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+#info{font-size:11px;color:var(--muted);text-align:center;margin-bottom:.4rem;display:none}
+#info.on{display:block}
 
-  #saved-info { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 0.5rem; display: none; }
-  #saved-info.visible { display: block; }
+#list{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;max-height:260px;overflow-y:auto;margin-bottom:.75rem}
+#empty{padding:2.5rem 1rem;text-align:center;color:var(--muted);font-size:13px}
+.item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.item:last-child{border-bottom:none}
+.n{width:22px;height:22px;border-radius:50%;background:var(--card2);color:var(--muted);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.c{flex:1;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);word-break:break-all}
+.x{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0}
 
-  #list {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); overflow: hidden;
-    max-height: 260px; overflow-y: auto;
-    margin-bottom: 0.75rem;
-  }
-  #empty { padding: 2.5rem 1rem; text-align: center; color: var(--muted); font-size: 13px; }
-  .row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 14px; border-bottom: 1px solid var(--border);
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
-  .row:last-child { border-bottom: none; }
-  .num { width: 22px; height: 22px; border-radius: 50%; background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .code { flex: 1; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); word-break: break-all; }
-  .del { background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
+.exp{display:flex;gap:8px}
+.exp .btn{margin-bottom:0}
 
-  .export-row { display: flex; gap: 8px; }
-  .export-row .btn { flex: 1; }
-
-  #flash { position: fixed; inset: 0; background: rgba(0,230,118,0.2); pointer-events: none; opacity: 0; z-index: 999; }
-  #flash.show { opacity: 1; }
+/* Flash */
+#flash{position:fixed;inset:0;background:rgba(0,230,118,.18);pointer-events:none;opacity:0;z-index:999;transition:opacity .3s}
+#flash.on{opacity:1;transition:none}
 </style>
 </head>
 <body>
@@ -133,240 +89,289 @@
   <div class="logo">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="2" height="18"/><rect x="7" y="3" width="1" height="18"/><rect x="10" y="3" width="3" height="18"/><rect x="15" y="3" width="1" height="18"/><rect x="18" y="3" width="3" height="18"/></svg>
   </div>
-  <div>
-    <h1>Escáner ISBN</h1>
-    <small>Inventario de libros → Excel</small>
-  </div>
+  <div><h1>Escáner ISBN</h1><small>Inventario de libros → Excel</small></div>
 </header>
 
-<main>
-  <button class="btn" id="cam-btn" onclick="toggleCam()">📷 Activar cámara</button>
+<button class="btn" id="cambtn" onclick="toggleCam()">📷 Activar cámara</button>
 
-  <div id="cam-wrap">
-    <video id="preview" autoplay playsinline muted></video>
-    <div class="corners"><div class="c2"></div></div>
-    <div class="scanline"></div>
-    <div id="cam-hint">Acerca el código — si no lee, gira el celular 🔄</div>
-  </div>
+<div id="box">
+  <video id="vid" autoplay playsinline muted></video>
+  <div class="line"></div>
+  <div class="cor"><div class="cor2"></div></div>
+  <div id="hint">Acerca el código — si no lee, gira el celular 🔄</div>
+</div>
 
-  <div id="status"><div class="dot" id="dot"></div><span id="stxt">Cargando...</span></div>
+<div id="st"><div class="dot" id="dot"></div><span id="stxt">Cargando datos...</span></div>
 
-  <div class="input-row">
-    <input type="text" id="manual" placeholder="ISBN manual..." inputmode="numeric" />
-    <button class="add-btn" onclick="addManual()">+ Agregar</button>
-  </div>
+<div class="row2">
+  <input id="manual" type="text" placeholder="ISBN manual..." inputmode="numeric">
+  <button class="addbtn" onclick="addManual()">+ Agregar</button>
+</div>
 
-  <div class="list-header">
-    <span>Escaneados <span class="badge" id="cnt">0</span></span>
-    <button class="clear-lnk" onclick="clearAll()">Limpiar todo</button>
-  </div>
-  <div id="saved-info">💾 Datos guardados en este dispositivo</div>
+<div class="lh">
+  <span>Guardados <span class="badge" id="cnt">0</span></span>
+  <button class="clr" onclick="clearAll()">Limpiar todo</button>
+</div>
+<div id="info">💾 Guardado en este dispositivo</div>
 
-  <div id="list"><div id="empty">Sin escaneos aún</div></div>
+<div id="list"><div id="empty">Sin escaneos aún</div></div>
 
-  <div class="export-row">
-    <button class="btn primary" onclick="exportCSV()">⬇ Descargar CSV</button>
-    <button class="btn" onclick="copyCodes()">⧉ Copiar ISBN</button>
-  </div>
-</main>
+<div class="exp">
+  <button class="btn green" onclick="exportCSV()">⬇ Descargar CSV</button>
+  <button class="btn" onclick="copyCodes()" style="margin-bottom:0">⧉ Copiar</button>
+</div>
 
-<!-- ZXing browser: la librería más moderna y confiable para móvil -->
-<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script>
-const STORAGE_KEY = 'bukz_isbn_v2';
-let items = [], camOn = false, scanLocked = false;
-let codeReader = null, videoStream = null;
+// ── Storage ──────────────────────────────────────────
+const KEY = 'isbn_bukz';
+let items = [];
 
-// Persistencia
-function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e){} }
-function load() { try { const d = localStorage.getItem(STORAGE_KEY); if(d) items = JSON.parse(d); } catch(e){ items=[]; } }
-
-// Init
-load(); render();
-if (items.length > 0) {
-  setStatus('Se cargaron ' + items.length + ' códigos guardados', 'ok');
-  document.getElementById('saved-info').classList.add('visible');
-} else {
-  setStatus('Listo — activa la cámara o ingresa manualmente', '');
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) items = JSON.parse(raw);
+  } catch(e) { items = []; }
 }
 
-function setStatus(msg, type) {
+// ── UI helpers ───────────────────────────────────────
+function setSt(msg, type) {
   document.getElementById('stxt').textContent = msg;
   const d = document.getElementById('dot');
-  d.className = 'dot' + (type==='on'?' on':type==='ok'?' ok':type==='err'?' err':'');
+  d.className = 'dot' + (type === 'on' ? ' on' : type === 'ok' ? ' ok' : type === 'err' ? ' err' : '');
 }
 
-function flash() {
+function doFlash() {
   const f = document.getElementById('flash');
-  f.classList.add('show');
-  setTimeout(()=>f.classList.remove('show'), 250);
+  f.classList.add('on');
+  setTimeout(() => f.classList.remove('on'), 250);
 }
 
-function addCode(code) {
-  code = (code||'').trim();
+function addCode(raw) {
+  const code = (raw || '').trim();
   if (!code) return;
-  items.push({ code, id: Date.now() });
-  save(); render();
-  setStatus('✓ ' + code, 'ok');
+  items.push({ code: code, id: Date.now() + Math.random() });
+  save();
+  render();
+  setSt('✓ ' + code, 'ok');
   document.getElementById('manual').value = '';
-  document.getElementById('saved-info').classList.add('visible');
-  flash();
+  document.getElementById('info').classList.add('on');
+  doFlash();
 }
 
-function removeItem(id) { items = items.filter(i=>i.id!==id); save(); render(); }
+function removeItem(id) {
+  items = items.filter(i => i.id !== id);
+  save();
+  render();
+}
 
 function clearAll() {
   if (!items.length) return;
-  if (confirm('¿Limpiar todos los códigos?')) {
-    items=[]; save(); render();
-    setStatus('Lista limpiada','');
-    document.getElementById('saved-info').classList.remove('visible');
+  if (confirm('¿Borrar todos los códigos guardados?')) {
+    items = [];
+    save();
+    render();
+    setSt('Lista limpiada', '');
+    document.getElementById('info').classList.remove('on');
   }
 }
 
 function render() {
   document.getElementById('cnt').textContent = items.length;
   const list = document.getElementById('list');
-  if (!items.length) { list.innerHTML='<div id="empty">Sin escaneos aún</div>'; return; }
-  list.innerHTML = items.map((item,i)=>`
-    <div class="row">
-      <div class="num">${i+1}</div>
-      <div class="code">${(item.code+'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
-      <button class="del" onclick="removeItem(${item.id})">✕</button>
-    </div>`).join('');
+  if (!items.length) {
+    list.innerHTML = '<div id="empty">Sin escaneos aún</div>';
+    return;
+  }
+  list.innerHTML = items.map((item, i) =>
+    '<div class="item">' +
+    '<div class="n">' + (i + 1) + '</div>' +
+    '<div class="c">' + String(item.code).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' +
+    '<button class="x" onclick="removeItem(' + item.id + ')">✕</button>' +
+    '</div>'
+  ).join('');
   list.scrollTop = list.scrollHeight;
 }
 
 function exportCSV() {
-  if (!items.length) { alert('No hay códigos para exportar'); return; }
-  const blob = new Blob(['\uFEFF' + items.map(it=>'"'+it.code+'"').join('\n')], {type:'text/csv;charset=utf-8;'});
+  if (!items.length) { alert('No hay códigos'); return; }
+  const blob = new Blob(
+    ['\uFEFF' + items.map(it => '"' + it.code + '"').join('\n')],
+    { type: 'text/csv;charset=utf-8;' }
+  );
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'isbn_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.download = 'isbn_' + new Date().toISOString().slice(0, 10) + '.csv';
   a.click();
-  setStatus('CSV descargado ✓','ok');
+  setSt('CSV descargado ✓', 'ok');
 }
 
 function copyCodes() {
   if (!items.length) { alert('No hay códigos'); return; }
-  navigator.clipboard.writeText(items.map(it=>it.code).join('\n'))
-    .then(()=>setStatus('Copiado ✓','ok'))
-    .catch(()=>setStatus('Error al copiar','err'));
+  navigator.clipboard.writeText(items.map(it => it.code).join('\n'))
+    .then(() => setSt('Copiado ✓', 'ok'))
+    .catch(() => setSt('Error al copiar', 'err'));
 }
 
-// ---- Escáner con ZXing ----
+function addManual() { addCode(document.getElementById('manual').value); }
+document.getElementById('manual').addEventListener('keydown', e => { if (e.key === 'Enter') addManual(); });
+
+// ── Camera + scanning ─────────────────────────────────
+let camOn = false, stream = null, animFrame = null, locked = false;
+
 async function toggleCam() {
   if (camOn) { stopCam(); return; }
 
-  const wrap = document.getElementById('cam-wrap');
-  const video = document.getElementById('preview');
-  const btn = document.getElementById('cam-btn');
-
   try {
-    // Pedir cámara trasera con alta resolución
-    videoStream = await navigator.mediaDevices.getUserMedia({
+    stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: 'environment' },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        focusMode: { ideal: 'continuous' }
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       }
     });
-    video.srcObject = videoStream;
-    await video.play();
   } catch(e) {
-    setStatus('Sin acceso a cámara — permite el permiso', 'err');
+    setSt('Sin permiso de cámara', 'err');
     return;
   }
 
-  wrap.classList.add('active');
-  btn.textContent = '⏹ Detener cámara';
-  btn.className = 'btn stop';
+  const vid = document.getElementById('vid');
+  vid.srcObject = stream;
+
+  // Esperar a que el video esté listo
+  await new Promise(res => {
+    vid.onloadedmetadata = () => { vid.play(); res(); };
+  });
+
+  document.getElementById('box').classList.add('on');
+  document.getElementById('cambtn').textContent = '⏹ Detener cámara';
+  document.getElementById('cambtn').className = 'btn red';
   camOn = true;
-  setStatus('Cámara activa — apunta al código', 'on');
-
-  // Escanear frame a frame con canvas
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-  // Crear lector ZXing con todos los formatos
-  const hints = new Map();
-  const formats = [
-    ZXing.BarcodeFormat.EAN_13,
-    ZXing.BarcodeFormat.EAN_8,
-    ZXing.BarcodeFormat.UPC_A,
-    ZXing.BarcodeFormat.UPC_E,
-    ZXing.BarcodeFormat.CODE_128,
-    ZXing.BarcodeFormat.CODE_39,
-    ZXing.BarcodeFormat.QR_CODE,
-    ZXing.BarcodeFormat.DATA_MATRIX,
-    ZXing.BarcodeFormat.ITF,
-    ZXing.BarcodeFormat.CODABAR,
-  ];
-  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-
-  const reader = new ZXing.MultiFormatReader();
-  reader.setHints(hints);
-
-  function tick() {
-    if (!camOn) return;
-
-    if (video.readyState >= 2 && video.videoWidth > 0) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0);
-
-      try {
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const lum = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
-        const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-        const result = reader.decode(bmp);
-
-        if (result && result.getText()) {
-          const code = result.getText();
-          if (!scanLocked) {
-            scanLocked = true;
-            addCode(code);
-            let secs = 3;
-            setStatus('⏳ Siguiente en ' + secs + 's...', 'on');
-            const iv = setInterval(()=>{
-              secs--;
-              if (secs > 0) {
-                setStatus('⏳ Siguiente en ' + secs + 's...', 'on');
-              } else {
-                clearInterval(iv);
-                scanLocked = false;
-                if (camOn) setStatus('Listo — apunta al siguiente código', 'on');
-              }
-            }, 1000);
-          }
-        }
-      } catch(e) {
-        // No decode — normal, seguir intentando
-      }
-    }
-
-    requestAnimationFrame(tick);
-  }
-
-  requestAnimationFrame(tick);
+  setSt('Cámara activa — apunta al código', 'on');
+  startScan(vid);
 }
 
 function stopCam() {
   camOn = false;
-  scanLocked = false;
-  if (videoStream) { videoStream.getTracks().forEach(t=>t.stop()); videoStream = null; }
-  const video = document.getElementById('preview');
-  video.srcObject = null;
-  document.getElementById('cam-wrap').classList.remove('active');
-  document.getElementById('cam-btn').textContent = '📷 Activar cámara';
-  document.getElementById('cam-btn').className = 'btn';
-  setStatus('Cámara detenida','');
+  locked = false;
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  const vid = document.getElementById('vid');
+  vid.srcObject = null;
+  document.getElementById('box').classList.remove('on');
+  document.getElementById('cambtn').textContent = '📷 Activar cámara';
+  document.getElementById('cambtn').className = 'btn';
+  setSt('Cámara detenida', '');
 }
 
-document.getElementById('manual').addEventListener('keydown', e=>{ if(e.key==='Enter') addManual(); });
-function addManual() { addCode(document.getElementById('manual').value); }
+function startScan(vid) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  function tick() {
+    if (!camOn) return;
+    animFrame = requestAnimationFrame(tick);
+
+    if (locked) return;
+    if (vid.readyState < 2 || vid.videoWidth === 0) return;
+
+    canvas.width  = vid.videoWidth;
+    canvas.height = vid.videoHeight;
+    ctx.drawImage(vid, 0, 0);
+
+    let code = null;
+
+    // Intentar con BarcodeDetector nativo (Chrome/Android)
+    if (window._barcodeDetector) {
+      // Se maneja en la promesa abajo
+      return;
+    }
+
+    // Fallback: BarcodeDetector API async
+    if ('BarcodeDetector' in window) {
+      if (!window._barcodeDetector) {
+        window._barcodeDetector = new BarcodeDetector({
+          formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','qr_code','data_matrix','codabar']
+        });
+      }
+      window._barcodeDetector.detect(canvas).then(results => {
+        if (!locked && results.length > 0) {
+          locked = true;
+          addCode(results[0].rawValue);
+          countdown();
+        }
+      }).catch(() => {});
+      return;
+    }
+
+    // Si no hay BarcodeDetector (iOS Safari < 17), usar ZXing
+    if (window.ZXingLoaded && !locked) {
+      try {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const lum = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
+        const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+        const result = window._zxReader.decode(bmp);
+        if (result && result.getText()) {
+          locked = true;
+          addCode(result.getText());
+          countdown();
+        }
+      } catch(e) {}
+    }
+  }
+
+  animFrame = requestAnimationFrame(tick);
+}
+
+function countdown() {
+  let s = 3;
+  setSt('⏳ Siguiente en ' + s + 's...', 'on');
+  const iv = setInterval(() => {
+    s--;
+    if (s > 0) {
+      setSt('⏳ Siguiente en ' + s + 's...', 'on');
+    } else {
+      clearInterval(iv);
+      locked = false;
+      if (camOn) setSt('Listo — apunta al siguiente código', 'on');
+    }
+  }, 1000);
+}
+
+// ── Inicialización ────────────────────────────────────
+load();
+render();
+if (items.length > 0) {
+  setSt('Se cargaron ' + items.length + ' códigos guardados', 'ok');
+  document.getElementById('info').classList.add('on');
+} else {
+  setSt('Listo — activa la cámara o ingresa manualmente', '');
+}
+
+// Cargar ZXing como respaldo para iOS < 17
+(function loadZXing() {
+  const s = document.createElement('script');
+  s.src = 'https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js';
+  s.onload = function() {
+    try {
+      const hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+        ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
+        ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E,
+        ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
+        ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.DATA_MATRIX,
+        ZXing.BarcodeFormat.ITF, ZXing.BarcodeFormat.CODABAR,
+      ]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      window._zxReader = new ZXing.MultiFormatReader();
+      window._zxReader.setHints(hints);
+      window.ZXingLoaded = true;
+    } catch(e) {}
+  };
+  document.head.appendChild(s);
+})();
 </script>
 </body>
 </html>
