@@ -270,7 +270,14 @@ function startQuagga() {
       area: { top: '0%', right: '0%', left: '0%', bottom: '0%' }
     },
     decoder: {
-      readers: ['ean_reader'],
+      readers: [
+        'ean_reader',
+        'ean_8_reader',
+        'upc_reader',
+        'upc_e_reader',
+        'code_128_reader',
+        'code_39_reader'
+      ],
       multiple: false
     },
     locator: {
@@ -290,19 +297,6 @@ function startQuagga() {
     if (!result || !result.codeResult) return;
     const code = result.codeResult.code;
     if (!code) return;
-
-    // Aceptar EAN-13 de 13 dígitos o ISBN-10 de 10 dígitos
-    const n = code.replace(/\D/g,'');
-    if (n.length !== 13 && n.length !== 10) return;
-
-    // Confianza más permisiva para etiquetas rotadas o con sticker
-    const errors = result.codeResult.decodedCodes
-      .filter(x => x.error !== undefined)
-      .map(x => x.error);
-    if (errors.length > 0) {
-      const avg = errors.reduce((a,b)=>a+b,0) / errors.length;
-      if (avg > 0.5) return;
-    }
 
     if (scanLocked) return;
     scanLocked = true;
