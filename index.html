@@ -23,36 +23,34 @@
 
   main { padding: 0 1.25rem 2rem; }
 
-  #viewport {
+  #cam-wrap {
     width: 100%; aspect-ratio: 4/3; border-radius: var(--radius);
     background: #111; overflow: hidden; position: relative;
     border: 1px solid var(--border); margin-bottom: 0.75rem; display: none;
   }
-  #viewport.active { display: block; }
-  #viewport video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; position: absolute !important; top:0 !important; left:0 !important; }
-  #viewport canvas { display: none !important; }
-
-  .scan-corners { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
-  .scan-corners::before, .scan-corners::after, .c2::before, .c2::after {
-    content: ''; position: absolute; width: 22px; height: 22px;
+  #cam-wrap.active { display: block; }
+  #preview {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; position: absolute; top: 0; left: 0;
+  }
+  .corners { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .corners::before, .corners::after, .c2::before, .c2::after {
+    content: ''; position: absolute; width: 24px; height: 24px;
     border-color: var(--accent); border-style: solid;
   }
-  .scan-corners::before { top: 14px; left: 14px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
-  .scan-corners::after  { top: 14px; right: 14px; border-width: 3px 3px 0 0; border-radius: 0 3px 0 0; }
-  .c2::before { bottom: 14px; left: 14px; border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
-  .c2::after  { bottom: 14px; right: 14px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
-  #scan-line {
-    position: absolute; left: 12%; right: 12%; height: 2px; z-index: 11;
-    background: var(--accent); top: 20%; box-shadow: 0 0 8px var(--accent);
+  .corners::before { top: 12px; left: 12px; border-width: 3px 0 0 3px; }
+  .corners::after  { top: 12px; right: 12px; border-width: 3px 3px 0 0; }
+  .c2::before { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; }
+  .c2::after  { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; }
+  .scanline {
+    position: absolute; left: 8%; right: 8%; height: 2px; z-index: 11;
+    background: var(--accent); box-shadow: 0 0 8px var(--accent);
     animation: sweep 2s ease-in-out infinite;
   }
-  @keyframes sweep { 0%,100% { top: 15%; } 50% { top: 82%; } }
-
-  /* Hint para etiquetas rotadas */
-  #rotate-hint {
-    position: absolute; bottom: 10px; left: 0; right: 0; z-index: 12;
-    text-align: center; font-size: 11px; color: rgba(255,255,255,0.7);
-    pointer-events: none;
+  @keyframes sweep { 0%,100% { top: 10%; } 50% { top: 88%; } }
+  #cam-hint {
+    position: absolute; bottom: 8px; left: 0; right: 0; z-index: 12;
+    text-align: center; font-size: 11px; color: rgba(255,255,255,0.65); pointer-events: none;
   }
 
   .btn {
@@ -74,10 +72,10 @@
     margin-bottom: 0.75rem; min-height: 42px;
   }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .dot.on  { background: var(--accent); animation: blink 1.2s ease-in-out infinite; }
+  .dot.on  { background: var(--accent); animation: blink 1s ease-in-out infinite; }
   .dot.ok  { background: var(--accent); }
   .dot.err { background: var(--danger); }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
   .input-row { display: flex; gap: 8px; margin-bottom: 0.75rem; }
   input[type=text] {
@@ -108,7 +106,6 @@
     border-radius: var(--radius); overflow: hidden;
     max-height: 260px; overflow-y: auto;
     margin-bottom: 0.75rem;
-    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
   }
   #empty { padding: 2.5rem 1rem; text-align: center; color: var(--muted); font-size: 13px; }
   .row {
@@ -116,7 +113,7 @@
     padding: 11px 14px; border-bottom: 1px solid var(--border);
     animation: fadeIn 0.2s ease;
   }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
   .row:last-child { border-bottom: none; }
   .num { width: 22px; height: 22px; border-radius: 50%; background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .code { flex: 1; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); word-break: break-all; }
@@ -125,8 +122,8 @@
   .export-row { display: flex; gap: 8px; }
   .export-row .btn { flex: 1; }
 
-  #flash { position: fixed; inset: 0; background: rgba(0,230,118,0.15); pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 99; }
-  #flash.show { opacity: 1; transition: none; }
+  #flash { position: fixed; inset: 0; background: rgba(0,230,118,0.2); pointer-events: none; opacity: 0; z-index: 999; }
+  #flash.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -145,13 +142,14 @@
 <main>
   <button class="btn" id="cam-btn" onclick="toggleCam()">📷 Activar cámara</button>
 
-  <div id="viewport">
-    <div class="scan-corners"><div class="c2"></div></div>
-    <div id="scan-line"></div>
-    <div id="rotate-hint">Si no lee, gira el celular horizontalmente 🔄</div>
+  <div id="cam-wrap">
+    <video id="preview" autoplay playsinline muted></video>
+    <div class="corners"><div class="c2"></div></div>
+    <div class="scanline"></div>
+    <div id="cam-hint">Acerca el código — si no lee, gira el celular 🔄</div>
   </div>
 
-  <div id="status"><div class="dot" id="dot"></div><span id="stxt">Cargando datos guardados...</span></div>
+  <div id="status"><div class="dot" id="dot"></div><span id="stxt">Cargando...</span></div>
 
   <div class="input-row">
     <input type="text" id="manual" placeholder="ISBN manual..." inputmode="numeric" />
@@ -162,7 +160,6 @@
     <span>Escaneados <span class="badge" id="cnt">0</span></span>
     <button class="clear-lnk" onclick="clearAll()">Limpiar todo</button>
   </div>
-
   <div id="saved-info">💾 Datos guardados en este dispositivo</div>
 
   <div id="list"><div id="empty">Sin escaneos aún</div></div>
@@ -173,22 +170,21 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+<!-- ZXing browser: la librería más moderna y confiable para móvil -->
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script>
-const STORAGE_KEY = 'bukz_isbn_items';
+const STORAGE_KEY = 'bukz_isbn_v2';
 let items = [], camOn = false, scanLocked = false;
+let codeReader = null, videoStream = null;
 
-function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e){}
-}
-function load() {
-  try { const d = localStorage.getItem(STORAGE_KEY); if (d) items = JSON.parse(d); } catch(e) { items = []; }
-}
+// Persistencia
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e){} }
+function load() { try { const d = localStorage.getItem(STORAGE_KEY); if(d) items = JSON.parse(d); } catch(e){ items=[]; } }
 
-load();
-render();
+// Init
+load(); render();
 if (items.length > 0) {
-  setStatus('Se cargaron ' + items.length + ' ISBN guardados', 'ok');
+  setStatus('Se cargaron ' + items.length + ' códigos guardados', 'ok');
   document.getElementById('saved-info').classList.add('visible');
 } else {
   setStatus('Listo — activa la cámara o ingresa manualmente', '');
@@ -200,27 +196,30 @@ function setStatus(msg, type) {
   d.className = 'dot' + (type==='on'?' on':type==='ok'?' ok':type==='err'?' err':'');
 }
 
-function addCode(code) {
-  code = code.trim();
-  if (!code) return;
-  const ts = new Date().toLocaleString('es-MX');
-  items.push({ code, ts, id: Date.now() });
-  save();
-  render();
-  setStatus('✓ ISBN guardado: ' + code, 'ok');
-  document.getElementById('manual').value = '';
-  document.getElementById('saved-info').classList.add('visible');
+function flash() {
   const f = document.getElementById('flash');
   f.classList.add('show');
-  setTimeout(()=>f.classList.remove('show'), 200);
+  setTimeout(()=>f.classList.remove('show'), 250);
+}
+
+function addCode(code) {
+  code = (code||'').trim();
+  if (!code) return;
+  items.push({ code, id: Date.now() });
+  save(); render();
+  setStatus('✓ ' + code, 'ok');
+  document.getElementById('manual').value = '';
+  document.getElementById('saved-info').classList.add('visible');
+  flash();
 }
 
 function removeItem(id) { items = items.filter(i=>i.id!==id); save(); render(); }
 
 function clearAll() {
-  if (items.length && confirm('¿Limpiar todos los ISBN? No se puede deshacer.')) {
-    items = []; save(); render();
-    setStatus('Lista limpiada', '');
+  if (!items.length) return;
+  if (confirm('¿Limpiar todos los códigos?')) {
+    items=[]; save(); render();
+    setStatus('Lista limpiada','');
     document.getElementById('saved-info').classList.remove('visible');
   }
 }
@@ -232,116 +231,138 @@ function render() {
   list.innerHTML = items.map((item,i)=>`
     <div class="row">
       <div class="num">${i+1}</div>
-      <div class="code">${item.code.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+      <div class="code">${(item.code+'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
       <button class="del" onclick="removeItem(${item.id})">✕</button>
     </div>`).join('');
   list.scrollTop = list.scrollHeight;
 }
 
 function exportCSV() {
-  if (!items.length) { alert('No hay ISBN para exportar'); return; }
-  const csv = items.map(it=>`"${it.code}"`).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
+  if (!items.length) { alert('No hay códigos para exportar'); return; }
+  const blob = new Blob(['\uFEFF' + items.map(it=>'"'+it.code+'"').join('\n')], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
-  a.href=url; a.download='isbn_inventario_'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click(); URL.revokeObjectURL(url);
-  setStatus('CSV descargado ✓', 'ok');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'isbn_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  setStatus('CSV descargado ✓','ok');
 }
 
 function copyCodes() {
-  if (!items.length) { alert('No hay ISBN para copiar'); return; }
+  if (!items.length) { alert('No hay códigos'); return; }
   navigator.clipboard.writeText(items.map(it=>it.code).join('\n'))
-    .then(()=>setStatus('Copiado — pega en Excel o WhatsApp', 'ok'))
-    .catch(()=>setStatus('Error al copiar', 'err'));
+    .then(()=>setStatus('Copiado ✓','ok'))
+    .catch(()=>setStatus('Error al copiar','err'));
 }
 
-function startQuagga() {
-  Quagga.init({
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.getElementById('viewport'),
-      constraints: {
-        facingMode: 'environment',
-        width: { min: 640, ideal: 1920, max: 2560 },
-        height: { min: 480, ideal: 1080, max: 1440 }
-      },
-      area: { top: '0%', right: '0%', left: '0%', bottom: '0%' }
-    },
-    decoder: {
-      readers: [
-        'ean_reader',
-        'ean_8_reader',
-        'upc_reader',
-        'upc_e_reader',
-        'code_128_reader',
-        'code_39_reader'
-      ],
-      multiple: false
-    },
-    locator: {
-      patchSize: 'large',
-      halfSample: false
-    },
-    locate: true,
-    numOfWorkers: 2,
-    frequency: 20
-  }, function(err) {
-    if (err) { setStatus('Error al iniciar cámara', 'err'); stopCam(); return; }
-    Quagga.start();
-    setStatus('Cámara activa — apunta al código del libro', 'on');
-  });
+// ---- Escáner con ZXing ----
+async function toggleCam() {
+  if (camOn) { stopCam(); return; }
 
-  Quagga.onDetected(function(result) {
-    if (!result || !result.codeResult) return;
-    const code = result.codeResult.code;
-    if (!code) return;
+  const wrap = document.getElementById('cam-wrap');
+  const video = document.getElementById('preview');
+  const btn = document.getElementById('cam-btn');
 
-    if (scanLocked) return;
-    scanLocked = true;
-    addCode(code);
-
-    let secs = 3;
-    setStatus('⏳ Siguiente escaneo en ' + secs + 's...', 'on');
-    const iv = setInterval(()=>{
-      secs--;
-      if (secs > 0) {
-        setStatus('⏳ Siguiente escaneo en ' + secs + 's...', 'on');
-      } else {
-        clearInterval(iv);
-        scanLocked = false;
-        setStatus('Listo — apunta al siguiente ISBN', 'on');
+  try {
+    // Pedir cámara trasera con alta resolución
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        focusMode: { ideal: 'continuous' }
       }
-    }, 1000);
-  });
+    });
+    video.srcObject = videoStream;
+    await video.play();
+  } catch(e) {
+    setStatus('Sin acceso a cámara — permite el permiso', 'err');
+    return;
+  }
+
+  wrap.classList.add('active');
+  btn.textContent = '⏹ Detener cámara';
+  btn.className = 'btn stop';
+  camOn = true;
+  setStatus('Cámara activa — apunta al código', 'on');
+
+  // Escanear frame a frame con canvas
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  // Crear lector ZXing con todos los formatos
+  const hints = new Map();
+  const formats = [
+    ZXing.BarcodeFormat.EAN_13,
+    ZXing.BarcodeFormat.EAN_8,
+    ZXing.BarcodeFormat.UPC_A,
+    ZXing.BarcodeFormat.UPC_E,
+    ZXing.BarcodeFormat.CODE_128,
+    ZXing.BarcodeFormat.CODE_39,
+    ZXing.BarcodeFormat.QR_CODE,
+    ZXing.BarcodeFormat.DATA_MATRIX,
+    ZXing.BarcodeFormat.ITF,
+    ZXing.BarcodeFormat.CODABAR,
+  ];
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+
+  const reader = new ZXing.MultiFormatReader();
+  reader.setHints(hints);
+
+  function tick() {
+    if (!camOn) return;
+
+    if (video.readyState >= 2 && video.videoWidth > 0) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+
+      try {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const lum = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
+        const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
+        const result = reader.decode(bmp);
+
+        if (result && result.getText()) {
+          const code = result.getText();
+          if (!scanLocked) {
+            scanLocked = true;
+            addCode(code);
+            let secs = 3;
+            setStatus('⏳ Siguiente en ' + secs + 's...', 'on');
+            const iv = setInterval(()=>{
+              secs--;
+              if (secs > 0) {
+                setStatus('⏳ Siguiente en ' + secs + 's...', 'on');
+              } else {
+                clearInterval(iv);
+                scanLocked = false;
+                if (camOn) setStatus('Listo — apunta al siguiente código', 'on');
+              }
+            }, 1000);
+          }
+        }
+      } catch(e) {
+        // No decode — normal, seguir intentando
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
 }
 
 function stopCam() {
   camOn = false;
-  try { Quagga.stop(); } catch(e){}
-  const vp = document.getElementById('viewport');
-  vp.classList.remove('active');
-  vp.innerHTML = '<div class="scan-corners"><div class="c2"></div></div><div id="scan-line"></div><div id="rotate-hint">Si no lee, gira el celular horizontalmente 🔄</div>';
-  document.getElementById('cam-btn').innerHTML = '📷 Activar cámara';
+  scanLocked = false;
+  if (videoStream) { videoStream.getTracks().forEach(t=>t.stop()); videoStream = null; }
+  const video = document.getElementById('preview');
+  video.srcObject = null;
+  document.getElementById('cam-wrap').classList.remove('active');
+  document.getElementById('cam-btn').textContent = '📷 Activar cámara';
   document.getElementById('cam-btn').className = 'btn';
-}
-
-async function toggleCam() {
-  if (camOn) { stopCam(); setStatus('Cámara detenida',''); return; }
-  try {
-    const test = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    test.getTracks().forEach(t=>t.stop());
-  } catch(e) {
-    setStatus('Sin acceso a cámara — permite el permiso en tu navegador', 'err');
-    return;
-  }
-  document.getElementById('viewport').classList.add('active');
-  document.getElementById('cam-btn').innerHTML = '⏹ Detener cámara';
-  document.getElementById('cam-btn').className = 'btn stop';
-  camOn = true;
-  setStatus('Iniciando cámara...', '');
-  startQuagga();
+  setStatus('Cámara detenida','');
 }
 
 document.getElementById('manual').addEventListener('keydown', e=>{ if(e.key==='Enter') addManual(); });
