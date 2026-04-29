@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Escáner ISBN & Códigos de Barras</title>
+<title>Escáner ISBN</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -93,6 +93,13 @@
   .badge { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 10px; border-radius: 99px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
   .clear-lnk { font-size: 12px; color: var(--danger); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
+  /* Saved indicator */
+  #saved-info {
+    font-size: 11px; color: var(--muted); text-align: center;
+    margin-bottom: 0.5rem; display: none;
+  }
+  #saved-info.visible { display: block; }
+
   #list {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); overflow: hidden;
@@ -110,10 +117,6 @@
   .row:last-child { border-bottom: none; }
   .num { width: 22px; height: 22px; border-radius: 50%; background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .code { flex: 1; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); word-break: break-all; }
-  .tag { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 99px; flex-shrink: 0; letter-spacing: 0.3px; }
-  .tag-isbn { background: #0d2a4a; color: #64b5f6; }
-  .tag-qr   { background: #1a0d3a; color: #ce93d8; }
-  .tag-bar  { background: #0d2a1a; color: #81c784; }
   .del { background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
 
   .export-row { display: flex; gap: 8px; }
@@ -131,8 +134,8 @@
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="2" height="18"/><rect x="7" y="3" width="1" height="18"/><rect x="10" y="3" width="3" height="18"/><rect x="15" y="3" width="1" height="18"/><rect x="18" y="3" width="3" height="18"/></svg>
   </div>
   <div>
-    <h1>Escáner de Códigos</h1>
-    <small>ISBN · Código de barras · QR → Excel</small>
+    <h1>Escáner ISBN</h1>
+    <small>Inventario de libros → Excel</small>
   </div>
 </header>
 
@@ -144,10 +147,10 @@
     <div id="scan-line"></div>
   </div>
 
-  <div id="status"><div class="dot" id="dot"></div><span id="stxt">Listo — activa la cámara o ingresa manualmente</span></div>
+  <div id="status"><div class="dot" id="dot"></div><span id="stxt">Cargando datos guardados...</span></div>
 
   <div class="input-row">
-    <input type="text" id="manual" placeholder="ISBN o código de barras..." inputmode="numeric" />
+    <input type="text" id="manual" placeholder="ISBN manual..." inputmode="numeric" />
     <button class="add-btn" onclick="addManual()">+ Agregar</button>
   </div>
 
@@ -156,50 +159,79 @@
     <button class="clear-lnk" onclick="clearAll()">Limpiar todo</button>
   </div>
 
+  <div id="saved-info" id="saved-info">💾 Datos guardados en este dispositivo</div>
+
   <div id="list"><div id="empty">Sin escaneos aún</div></div>
 
   <div class="export-row">
     <button class="btn primary" onclick="exportCSV()">⬇ Descargar CSV</button>
-    <button class="btn" onclick="copyTSV()">⧉ Copiar tabla</button>
+    <button class="btn" onclick="copyCodes()">⧉ Copiar ISBN</button>
   </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <script>
-let items = [], camOn = false, lastCode = '', lastTime = 0, scanLocked = false;
+const STORAGE_KEY = 'bukz_isbn_items';
+let items = [], camOn = false, scanLocked = false;
 
+// --- Persistencia ---
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e){}
+}
+
+function load() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    if (d) items = JSON.parse(d);
+  } catch(e) { items = []; }
+}
+
+// --- Init: cargar datos al abrir ---
+load();
+render();
+if (items.length > 0) {
+  setStatus('Se cargaron ' + items.length + ' ISBN guardados', 'ok');
+  document.getElementById('saved-info').classList.add('visible');
+} else {
+  setStatus('Listo — activa la cámara o ingresa manualmente', '');
+}
+
+// --- Helpers ---
 function setStatus(msg, type) {
   document.getElementById('stxt').textContent = msg;
   const d = document.getElementById('dot');
   d.className = 'dot' + (type==='on' ? ' on' : type==='ok' ? ' ok' : type==='err' ? ' err' : '');
 }
 
-function detectType(c) {
-  const n = c.replace(/\D/g,'');
-  if ((n.length===13 && (n.startsWith('978')||n.startsWith('979'))) || n.length===10) return 'ISBN';
-  if (c.startsWith('http') || c.startsWith('https') || (c.length>25 && /[a-zA-Z]/.test(c))) return 'QR';
-  return 'BAR';
-}
-
 function addCode(code) {
   code = code.trim();
   if (!code) return;
-
-  const type = detectType(code);
   const ts = new Date().toLocaleString('es-MX');
-  items.push({ code, type, ts, id: Date.now() });
+  items.push({ code, ts, id: Date.now() });
+  save();
   render();
-  setStatus('✓ Guardado: '+code, 'ok');
+  setStatus('✓ ISBN guardado: ' + code, 'ok');
   document.getElementById('manual').value = '';
+  document.getElementById('saved-info').classList.add('visible');
   const f = document.getElementById('flash');
   f.classList.add('show');
   setTimeout(()=>f.classList.remove('show'), 200);
 }
 
-function removeItem(id) { items = items.filter(i=>i.id!==id); render(); }
+function removeItem(id) {
+  items = items.filter(i=>i.id!==id);
+  save();
+  render();
+}
 
 function clearAll() {
-  if (items.length && confirm('¿Limpiar todos los códigos?')) { items=[]; render(); setStatus('Lista limpiada',''); }
+  if (items.length && confirm('¿Limpiar todos los ISBN? Esta acción no se puede deshacer.')) {
+    items = [];
+    save();
+    render();
+    setStatus('Lista limpiada', '');
+    document.getElementById('saved-info').classList.remove('visible');
+  }
 }
 
 function render() {
@@ -210,31 +242,32 @@ function render() {
     <div class="row">
       <div class="num">${i+1}</div>
       <div class="code">${item.code.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
-      <span class="tag ${item.type==='ISBN'?'tag-isbn':item.type==='QR'?'tag-qr':'tag-bar'}">${item.type}</span>
       <button class="del" onclick="removeItem(${item.id})">✕</button>
     </div>`).join('');
+  // Scroll al último
+  list.scrollTop = list.scrollHeight;
 }
 
 function exportCSV() {
-  if (!items.length) { alert('No hay códigos para exportar'); return; }
-  const rows = [['N°','Código','Tipo','Fecha/Hora'], ...items.map((it,i)=>[i+1,it.code,it.type,it.ts])];
-  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  if (!items.length) { alert('No hay ISBN para exportar'); return; }
+  const csv = items.map(it=>`"${it.code}"`).join('\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href=url; a.download='codigos_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.href=url; a.download='isbn_inventario_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click(); URL.revokeObjectURL(url);
-  setStatus('CSV descargado ✓','ok');
+  setStatus('CSV descargado ✓', 'ok');
 }
 
-function copyTSV() {
-  if (!items.length) { alert('No hay códigos para copiar'); return; }
-  const text = items.map(it => it.code).join('\n');
+function copyCodes() {
+  if (!items.length) { alert('No hay ISBN para copiar'); return; }
+  const text = items.map(it=>it.code).join('\n');
   navigator.clipboard.writeText(text)
-    .then(()=>setStatus('Copiado — pega en Excel o WhatsApp','ok'))
-    .catch(()=>setStatus('Error al copiar','err'));
+    .then(()=>setStatus('Copiado — pega en Excel o WhatsApp', 'ok'))
+    .catch(()=>setStatus('Error al copiar', 'err'));
 }
 
+// --- Quagga scanner ---
 function startQuagga() {
   Quagga.init({
     inputStream: {
@@ -249,57 +282,49 @@ function startQuagga() {
       area: { top: '15%', right: '5%', left: '5%', bottom: '15%' }
     },
     decoder: {
-      readers: [
-        'ean_reader',
-        'ean_8_reader',
-        'upc_reader',
-        'upc_e_reader',
-        'code_128_reader',
-        'code_39_reader'
-      ],
+      readers: ['ean_reader'],
       multiple: false
     },
     locate: true,
     numOfWorkers: 2,
     frequency: 15
   }, function(err) {
-    if (err) {
-      console.error(err);
-      setStatus('Error al iniciar cámara', 'err');
-      stopCam();
-      return;
-    }
+    if (err) { setStatus('Error al iniciar cámara', 'err'); stopCam(); return; }
     Quagga.start();
-    setStatus('Cámara activa — apunta al código de barras', 'on');
+    setStatus('Cámara activa — apunta al ISBN del libro', 'on');
   });
 
   Quagga.onDetected(function(result) {
     if (!result || !result.codeResult) return;
     const code = result.codeResult.code;
-    if (!code || code.length < 6) return;
+    if (!code || code.length < 10) return;
+
+    // Solo ISBN (978/979 o 10 dígitos)
+    const n = code.replace(/\D/g,'');
+    const isISBN = (n.length===13 && (n.startsWith('978')||n.startsWith('979'))) || n.length===10;
+    if (!isISBN) return;
 
     // Filtrar por confianza
-    const errors = result.codeResult.decodedCodes
-      .filter(x => x.error !== undefined)
-      .map(x => x.error);
+    const errors = result.codeResult.decodedCodes.filter(x=>x.error!==undefined).map(x=>x.error);
     if (errors.length > 0) {
-      const avgErr = errors.reduce((a,b)=>a+b,0) / errors.length;
-      if (avgErr > 0.3) return;
+      const avg = errors.reduce((a,b)=>a+b,0) / errors.length;
+      if (avg > 0.3) return;
     }
 
     if (scanLocked) return;
     scanLocked = true;
     addCode(code);
+
     let secs = 3;
     setStatus('⏳ Siguiente escaneo en ' + secs + 's...', 'on');
-    const iv = setInterval(() => {
+    const iv = setInterval(()=>{
       secs--;
       if (secs > 0) {
         setStatus('⏳ Siguiente escaneo en ' + secs + 's...', 'on');
       } else {
         clearInterval(iv);
         scanLocked = false;
-        setStatus('Listo — apunta al siguiente código', 'on');
+        setStatus('Listo — apunta al siguiente ISBN', 'on');
       }
     }, 1000);
   });
@@ -319,9 +344,9 @@ async function toggleCam() {
   if (camOn) { stopCam(); setStatus('Cámara detenida',''); return; }
   try {
     const test = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    test.getTracks().forEach(t => t.stop());
+    test.getTracks().forEach(t=>t.stop());
   } catch(e) {
-    setStatus('Sin acceso a cámara — permite el permiso en Safari/Chrome', 'err');
+    setStatus('Sin acceso a cámara — permite el permiso en tu navegador', 'err');
     return;
   }
   document.getElementById('viewport').classList.add('active');
@@ -332,7 +357,7 @@ async function toggleCam() {
   startQuagga();
 }
 
-document.getElementById('manual').addEventListener('keydown', e => { if(e.key==='Enter') addManual(); });
+document.getElementById('manual').addEventListener('keydown', e=>{ if(e.key==='Enter') addManual(); });
 function addManual() { addCode(document.getElementById('manual').value); }
 </script>
 </body>
