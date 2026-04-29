@@ -6,65 +6,48 @@
 <title>Escáner ISBN</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0f0f0f; --card:#1a1a1a; --card2:#242424;
-  --border:#2e2e2e; --green:#00e676; --red:#ff5252;
-  --text:#f0f0f0; --muted:#777; --r:12px; --rs:8px;
-}
+:root{--bg:#0f0f0f;--card:#1a1a1a;--card2:#242424;--border:#2e2e2e;--green:#00e676;--red:#ff5252;--text:#f0f0f0;--muted:#777;--r:12px;--rs:8px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;max-width:480px;margin:0 auto;padding:1rem 1rem 3rem}
-
 h1{font-size:17px;font-weight:600}
 small{font-size:11px;color:var(--muted)}
 header{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
 .logo{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:18px;height:18px;fill:#000}
-
-/* Video */
 #box{width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--r);overflow:hidden;position:relative;border:1px solid var(--border);display:none;margin-bottom:.75rem}
 #box.on{display:block}
 #vid{width:100%;height:100%;object-fit:cover;display:block}
 .line{position:absolute;left:8%;right:8%;height:2px;background:var(--green);box-shadow:0 0 8px var(--green);animation:sw 2s ease-in-out infinite;z-index:5}
 @keyframes sw{0%,100%{top:10%}50%{top:86%}}
 .cor{position:absolute;inset:0;pointer-events:none;z-index:6}
-.cor::before,.cor::after,.cor2::before,.cor2::after{content:'';position:absolute;width:22px;height:22px;border-color:var(--green);border-style:solid}
+.cor::before,.cor::after,.c2::before,.c2::after{content:'';position:absolute;width:22px;height:22px;border-color:var(--green);border-style:solid}
 .cor::before{top:12px;left:12px;border-width:3px 0 0 3px}
 .cor::after{top:12px;right:12px;border-width:3px 3px 0 0}
-.cor2::before{bottom:12px;left:12px;border-width:0 0 3px 3px}
-.cor2::after{bottom:12px;right:12px;border-width:0 3px 3px 0}
-#hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.6);z-index:7;pointer-events:none}
-
-/* Status */
+.c2::before{bottom:12px;left:12px;border-width:0 0 3px 3px}
+.c2::after{bottom:12px;right:12px;border-width:0 3px 3px 0}
+#hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.65);z-index:7;pointer-events:none}
 #st{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;font-size:13px;margin-bottom:.75rem;min-height:42px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
 .dot.on{background:var(--green);animation:bl 1s ease-in-out infinite}
 .dot.ok{background:var(--green)}
 .dot.err{background:var(--red)}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
-
-/* Buttons */
 .btn{width:100%;padding:13px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.75rem}
 .btn:active{transform:scale(.97)}
 .btn.green{background:var(--green);color:#000;border-color:var(--green)}
 .btn.red{background:#1e0a0a;color:var(--red);border-color:#4a1515}
-
-/* Manual input */
 .row2{display:flex;gap:8px;margin-bottom:.75rem}
 input{flex:1;padding:11px 14px;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none}
 input:focus{border-color:var(--green)}
 input::placeholder{color:var(--muted)}
 .addbtn{padding:11px 16px;border-radius:var(--rs);background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .addbtn:active{transform:scale(.97)}
-
-/* List */
 .lh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
 .lh span{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
 .badge{font-size:11px;font-family:'DM Mono',monospace;padding:2px 9px;border-radius:99px;background:var(--card2);color:var(--muted);border:1px solid var(--border)}
 .clr{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
-
 #info{font-size:11px;color:var(--muted);text-align:center;margin-bottom:.4rem;display:none}
 #info.on{display:block}
-
 #list{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;max-height:260px;overflow-y:auto;margin-bottom:.75rem}
 #empty{padding:2.5rem 1rem;text-align:center;color:var(--muted);font-size:13px}
 .item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);animation:fi .2s ease}
@@ -73,22 +56,16 @@ input::placeholder{color:var(--muted)}
 .n{width:22px;height:22px;border-radius:50%;background:var(--card2);color:var(--muted);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .c{flex:1;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);word-break:break-all}
 .x{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0}
-
 .exp{display:flex;gap:8px}
 .exp .btn{margin-bottom:0}
-
-/* Flash */
-#flash{position:fixed;inset:0;background:rgba(0,230,118,.18);pointer-events:none;opacity:0;z-index:999;transition:opacity .3s}
+#flash{position:fixed;inset:0;background:rgba(0,230,118,.2);pointer-events:none;opacity:0;z-index:999;transition:opacity .3s}
 #flash.on{opacity:1;transition:none}
 </style>
 </head>
 <body>
 <div id="flash"></div>
-
 <header>
-  <div class="logo">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="2" height="18"/><rect x="7" y="3" width="1" height="18"/><rect x="10" y="3" width="3" height="18"/><rect x="15" y="3" width="1" height="18"/><rect x="18" y="3" width="3" height="18"/></svg>
-  </div>
+  <div class="logo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="2" height="18"/><rect x="7" y="3" width="1" height="18"/><rect x="10" y="3" width="3" height="18"/><rect x="15" y="3" width="1" height="18"/><rect x="18" y="3" width="3" height="18"/></svg></div>
   <div><h1>Escáner ISBN</h1><small>Inventario de libros → Excel</small></div>
 </header>
 
@@ -97,11 +74,11 @@ input::placeholder{color:var(--muted)}
 <div id="box">
   <video id="vid" autoplay playsinline muted></video>
   <div class="line"></div>
-  <div class="cor"><div class="cor2"></div></div>
-  <div id="hint">Acerca el código — si no lee, gira el celular 🔄</div>
+  <div class="cor"><div class="c2"></div></div>
+  <div id="hint">Acerca el código al centro 📖</div>
 </div>
 
-<div id="st"><div class="dot" id="dot"></div><span id="stxt">Cargando datos...</span></div>
+<div id="st"><div class="dot" id="dot"></div><span id="stxt">Iniciando...</span></div>
 
 <div class="row2">
   <input id="manual" type="text" placeholder="ISBN manual..." inputmode="numeric">
@@ -113,34 +90,33 @@ input::placeholder{color:var(--muted)}
   <button class="clr" onclick="clearAll()">Limpiar todo</button>
 </div>
 <div id="info">💾 Guardado en este dispositivo</div>
-
 <div id="list"><div id="empty">Sin escaneos aún</div></div>
 
 <div class="exp">
   <button class="btn green" onclick="exportCSV()">⬇ Descargar CSV</button>
-  <button class="btn" onclick="copyCodes()" style="margin-bottom:0">⧉ Copiar</button>
+  <button class="btn" style="margin-bottom:0" onclick="copyCodes()">⧉ Copiar</button>
 </div>
 
-<script>
+<script type="module">
+// Importar ZXing desde CDN (ESM, funciona en iOS Safari 14+)
+import { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } from 'https://esm.sh/@zxing/library@0.19.1';
+
 // ── Storage ──────────────────────────────────────────
-const KEY = 'isbn_bukz';
+const KEY = 'isbn_bukz_v3';
 let items = [];
 
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
 }
 function load() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) items = JSON.parse(raw);
-  } catch(e) { items = []; }
+  try { const r = localStorage.getItem(KEY); if (r) items = JSON.parse(r); } catch(e) { items = []; }
 }
 
-// ── UI helpers ───────────────────────────────────────
+// ── UI ────────────────────────────────────────────────
 function setSt(msg, type) {
   document.getElementById('stxt').textContent = msg;
   const d = document.getElementById('dot');
-  d.className = 'dot' + (type === 'on' ? ' on' : type === 'ok' ? ' ok' : type === 'err' ? ' err' : '');
+  d.className = 'dot' + (type==='on'?' on':type==='ok'?' ok':type==='err'?' err':'');
 }
 
 function doFlash() {
@@ -150,9 +126,9 @@ function doFlash() {
 }
 
 function addCode(raw) {
-  const code = (raw || '').trim();
+  const code = (raw||'').trim();
   if (!code) return;
-  items.push({ code: code, id: Date.now() + Math.random() });
+  items.push({ code, id: Date.now() + Math.random() });
   save();
   render();
   setSt('✓ ' + code, 'ok');
@@ -161,186 +137,133 @@ function addCode(raw) {
   doFlash();
 }
 
-function removeItem(id) {
+window.removeItem = function(id) {
   items = items.filter(i => i.id !== id);
-  save();
-  render();
-}
+  save(); render();
+};
 
-function clearAll() {
+window.clearAll = function() {
   if (!items.length) return;
   if (confirm('¿Borrar todos los códigos guardados?')) {
-    items = [];
-    save();
-    render();
+    items = []; save(); render();
     setSt('Lista limpiada', '');
     document.getElementById('info').classList.remove('on');
   }
-}
+};
 
 function render() {
   document.getElementById('cnt').textContent = items.length;
   const list = document.getElementById('list');
-  if (!items.length) {
-    list.innerHTML = '<div id="empty">Sin escaneos aún</div>';
-    return;
-  }
-  list.innerHTML = items.map((item, i) =>
-    '<div class="item">' +
-    '<div class="n">' + (i + 1) + '</div>' +
-    '<div class="c">' + String(item.code).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' +
-    '<button class="x" onclick="removeItem(' + item.id + ')">✕</button>' +
-    '</div>'
+  if (!items.length) { list.innerHTML = '<div id="empty">Sin escaneos aún</div>'; return; }
+  list.innerHTML = items.map((it, i) =>
+    `<div class="item">
+      <div class="n">${i+1}</div>
+      <div class="c">${String(it.code).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+      <button class="x" onclick="removeItem(${it.id})">✕</button>
+    </div>`
   ).join('');
   list.scrollTop = list.scrollHeight;
 }
 
-function exportCSV() {
+window.exportCSV = function() {
   if (!items.length) { alert('No hay códigos'); return; }
-  const blob = new Blob(
-    ['\uFEFF' + items.map(it => '"' + it.code + '"').join('\n')],
-    { type: 'text/csv;charset=utf-8;' }
-  );
+  const blob = new Blob(['\uFEFF' + items.map(it => `"${it.code}"`).join('\n')], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'isbn_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.download = 'isbn_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
   setSt('CSV descargado ✓', 'ok');
-}
+};
 
-function copyCodes() {
+window.copyCodes = function() {
   if (!items.length) { alert('No hay códigos'); return; }
   navigator.clipboard.writeText(items.map(it => it.code).join('\n'))
     .then(() => setSt('Copiado ✓', 'ok'))
     .catch(() => setSt('Error al copiar', 'err'));
-}
+};
 
-function addManual() { addCode(document.getElementById('manual').value); }
-document.getElementById('manual').addEventListener('keydown', e => { if (e.key === 'Enter') addManual(); });
+window.addManual = function() { addCode(document.getElementById('manual').value); };
+document.getElementById('manual').addEventListener('keydown', e => { if (e.key==='Enter') addCode(document.getElementById('manual').value); });
 
-// ── Camera + scanning ─────────────────────────────────
-let camOn = false, stream = null, animFrame = null, locked = false;
+// ── Scanner ───────────────────────────────────────────
+const hints = new Map();
+hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+  BarcodeFormat.EAN_13,
+  BarcodeFormat.EAN_8,
+  BarcodeFormat.UPC_A,
+  BarcodeFormat.UPC_E,
+  BarcodeFormat.CODE_128,
+  BarcodeFormat.CODE_39,
+  BarcodeFormat.QR_CODE,
+  BarcodeFormat.DATA_MATRIX,
+  BarcodeFormat.ITF,
+  BarcodeFormat.CODABAR,
+]);
+hints.set(DecodeHintType.TRY_HARDER, true);
 
-async function toggleCam() {
-  if (camOn) { stopCam(); return; }
+const reader = new BrowserMultiFormatReader(hints, 500);
 
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: 'environment' },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    });
-  } catch(e) {
-    setSt('Sin permiso de cámara', 'err');
+let camOn = false;
+let locked = false;
+
+window.toggleCam = async function() {
+  if (camOn) {
+    stopCam();
     return;
   }
 
   const vid = document.getElementById('vid');
-  vid.srcObject = stream;
-
-  // Esperar a que el video esté listo
-  await new Promise(res => {
-    vid.onloadedmetadata = () => { vid.play(); res(); };
-  });
-
   document.getElementById('box').classList.add('on');
   document.getElementById('cambtn').textContent = '⏹ Detener cámara';
   document.getElementById('cambtn').className = 'btn red';
   camOn = true;
-  setSt('Cámara activa — apunta al código', 'on');
-  startScan(vid);
-}
+  setSt('Iniciando cámara...', 'on');
+
+  try {
+    // Obtener dispositivos y preferir cámara trasera
+    const devices = await BrowserMultiFormatReader.listVideoInputDevices();
+    const backCam = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1];
+    const deviceId = backCam ? backCam.deviceId : undefined;
+
+    await reader.decodeFromVideoDevice(deviceId, vid, (result, err) => {
+      if (!result) return;
+      if (locked) return;
+      locked = true;
+      const code = result.getText();
+      addCode(code);
+
+      let s = 3;
+      setSt('⏳ Siguiente en ' + s + 's...', 'on');
+      const iv = setInterval(() => {
+        s--;
+        if (s > 0) {
+          setSt('⏳ Siguiente en ' + s + 's...', 'on');
+        } else {
+          clearInterval(iv);
+          locked = false;
+          if (camOn) setSt('Listo — apunta al siguiente código', 'on');
+        }
+      }, 1000);
+    });
+
+    setSt('Cámara activa — apunta al código', 'on');
+  } catch(e) {
+    setSt('Error: ' + (e.message || 'no se pudo iniciar la cámara'), 'err');
+    stopCam();
+  }
+};
 
 function stopCam() {
   camOn = false;
   locked = false;
-  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-  const vid = document.getElementById('vid');
-  vid.srcObject = null;
+  try { reader.reset(); } catch(e) {}
   document.getElementById('box').classList.remove('on');
   document.getElementById('cambtn').textContent = '📷 Activar cámara';
   document.getElementById('cambtn').className = 'btn';
   setSt('Cámara detenida', '');
 }
 
-function startScan(vid) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-  function tick() {
-    if (!camOn) return;
-    animFrame = requestAnimationFrame(tick);
-
-    if (locked) return;
-    if (vid.readyState < 2 || vid.videoWidth === 0) return;
-
-    canvas.width  = vid.videoWidth;
-    canvas.height = vid.videoHeight;
-    ctx.drawImage(vid, 0, 0);
-
-    let code = null;
-
-    // Intentar con BarcodeDetector nativo (Chrome/Android)
-    if (window._barcodeDetector) {
-      // Se maneja en la promesa abajo
-      return;
-    }
-
-    // Fallback: BarcodeDetector API async
-    if ('BarcodeDetector' in window) {
-      if (!window._barcodeDetector) {
-        window._barcodeDetector = new BarcodeDetector({
-          formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','qr_code','data_matrix','codabar']
-        });
-      }
-      window._barcodeDetector.detect(canvas).then(results => {
-        if (!locked && results.length > 0) {
-          locked = true;
-          addCode(results[0].rawValue);
-          countdown();
-        }
-      }).catch(() => {});
-      return;
-    }
-
-    // Si no hay BarcodeDetector (iOS Safari < 17), usar ZXing
-    if (window.ZXingLoaded && !locked) {
-      try {
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const lum = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
-        const bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum));
-        const result = window._zxReader.decode(bmp);
-        if (result && result.getText()) {
-          locked = true;
-          addCode(result.getText());
-          countdown();
-        }
-      } catch(e) {}
-    }
-  }
-
-  animFrame = requestAnimationFrame(tick);
-}
-
-function countdown() {
-  let s = 3;
-  setSt('⏳ Siguiente en ' + s + 's...', 'on');
-  const iv = setInterval(() => {
-    s--;
-    if (s > 0) {
-      setSt('⏳ Siguiente en ' + s + 's...', 'on');
-    } else {
-      clearInterval(iv);
-      locked = false;
-      if (camOn) setSt('Listo — apunta al siguiente código', 'on');
-    }
-  }, 1000);
-}
-
-// ── Inicialización ────────────────────────────────────
+// ── Init ──────────────────────────────────────────────
 load();
 render();
 if (items.length > 0) {
@@ -349,29 +272,6 @@ if (items.length > 0) {
 } else {
   setSt('Listo — activa la cámara o ingresa manualmente', '');
 }
-
-// Cargar ZXing como respaldo para iOS < 17
-(function loadZXing() {
-  const s = document.createElement('script');
-  s.src = 'https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js';
-  s.onload = function() {
-    try {
-      const hints = new Map();
-      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-        ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
-        ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E,
-        ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
-        ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.DATA_MATRIX,
-        ZXing.BarcodeFormat.ITF, ZXing.BarcodeFormat.CODABAR,
-      ]);
-      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-      window._zxReader = new ZXing.MultiFormatReader();
-      window._zxReader.setHints(hints);
-      window.ZXingLoaded = true;
-    } catch(e) {}
-  };
-  document.head.appendChild(s);
-})();
 </script>
 </body>
 </html>
