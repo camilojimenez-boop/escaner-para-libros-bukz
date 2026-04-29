@@ -9,25 +9,26 @@
 :root{--bg:#0f0f0f;--card:#1a1a1a;--card2:#242424;--border:#2e2e2e;--green:#00e676;--red:#ff5252;--text:#f0f0f0;--muted:#777;--r:12px;--rs:8px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;max-width:480px;margin:0 auto;padding:1rem 1rem 3rem}
-h1{font-size:17px;font-weight:600}
-small{font-size:11px;color:var(--muted)}
 header{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
 .logo{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:18px;height:18px;fill:#000}
+h1{font-size:17px;font-weight:600}
+small{font-size:11px;color:var(--muted)}
 
-/* El div del scanner lo maneja html5-qrcode, solo lo contenemos */
-#reader-wrap{width:100%;margin-bottom:.75rem;border-radius:var(--r);overflow:hidden;display:none}
-#reader-wrap.on{display:block}
-#reader{width:100%}
-/* Ocultar UI fea de html5-qrcode */
-#reader img{display:none!important}
-#reader__dashboard_section_swaplink{display:none!important}
-#reader__status_span{display:none!important}
-#reader__dashboard_section_csr span:nth-child(2){display:none!important}
-#reader select{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:6px 10px;font-size:12px;width:100%;margin-bottom:6px}
-#reader__filescan_input{display:none!important}
-#reader__dashboard{padding:8px;background:var(--card);border-top:1px solid var(--border)}
+/* Cámara */
+#box{width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--r);overflow:hidden;position:relative;border:1px solid var(--border);display:none;margin-bottom:.75rem}
+#box.on{display:block}
+#vid{width:100%;height:100%;object-fit:cover;display:block}
+.line{position:absolute;left:8%;right:8%;height:2px;background:var(--green);box-shadow:0 0 8px var(--green);animation:sw 2s ease-in-out infinite;z-index:5;pointer-events:none}
+@keyframes sw{0%,100%{top:10%}50%{top:86%}}
+.cor{position:absolute;inset:0;pointer-events:none;z-index:6}
+.cor::before,.cor::after,.c2::before,.c2::after{content:'';position:absolute;width:22px;height:22px;border-color:var(--green);border-style:solid}
+.cor::before{top:12px;left:12px;border-width:3px 0 0 3px}
+.cor::after{top:12px;right:12px;border-width:3px 3px 0 0}
+.c2::before{bottom:12px;left:12px;border-width:0 0 3px 3px}
+.c2::after{bottom:12px;right:12px;border-width:0 3px 3px 0}
 
+/* Status */
 #st{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;font-size:13px;margin-bottom:.75rem;min-height:42px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
 .dot.on{background:var(--green);animation:bl 1s ease-in-out infinite}
@@ -35,11 +36,13 @@ header{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
 .dot.err{background:var(--red)}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
 
+/* Botones */
 .btn{width:100%;padding:13px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.75rem}
 .btn:active{transform:scale(.97)}
 .btn.green{background:var(--green);color:#000;border-color:var(--green)}
 .btn.red{background:#1e0a0a;color:var(--red);border-color:#4a1515}
 
+/* Input manual */
 .row2{display:flex;gap:8px;margin-bottom:.75rem}
 input{flex:1;padding:11px 14px;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none}
 input:focus{border-color:var(--green)}
@@ -47,14 +50,13 @@ input::placeholder{color:var(--muted)}
 .addbtn{padding:11px 16px;border-radius:var(--rs);background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .addbtn:active{transform:scale(.97)}
 
+/* Lista */
 .lh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
 .lh span{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
 .badge{font-size:11px;font-family:'DM Mono',monospace;padding:2px 9px;border-radius:99px;background:var(--card2);color:var(--muted);border:1px solid var(--border)}
 .clr{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
-
 #info{font-size:11px;color:var(--muted);text-align:center;margin-bottom:.4rem;display:none}
 #info.on{display:block}
-
 #list{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;max-height:260px;overflow-y:auto;margin-bottom:.75rem}
 #empty{padding:2.5rem 1rem;text-align:center;color:var(--muted);font-size:13px}
 .item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);animation:fi .2s ease}
@@ -63,10 +65,8 @@ input::placeholder{color:var(--muted)}
 .n{width:22px;height:22px;border-radius:50%;background:var(--card2);color:var(--muted);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .c{flex:1;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);word-break:break-all}
 .x{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0}
-
 .exp{display:flex;gap:8px}
 .exp .btn{margin-bottom:0}
-
 #flash{position:fixed;inset:0;background:rgba(0,230,118,.2);pointer-events:none;opacity:0;z-index:999;transition:opacity .3s}
 #flash.on{opacity:1;transition:none}
 </style>
@@ -80,11 +80,13 @@ input::placeholder{color:var(--muted)}
 
 <button class="btn" id="cambtn" onclick="toggleCam()">📷 Activar cámara</button>
 
-<div id="reader-wrap">
-  <div id="reader"></div>
+<div id="box">
+  <video id="vid" autoplay playsinline muted></video>
+  <div class="line"></div>
+  <div class="cor"><div class="c2"></div></div>
 </div>
 
-<div id="st"><div class="dot" id="dot"></div><span id="stxt">Iniciando...</span></div>
+<div id="st"><div class="dot" id="dot"></div><span id="stxt">Cargando...</span></div>
 
 <div class="row2">
   <input id="manual" type="text" placeholder="ISBN manual..." inputmode="numeric">
@@ -103,196 +105,153 @@ input::placeholder{color:var(--muted)}
   <button class="btn" style="margin-bottom:0" onclick="copyCodes()">⧉ Copiar</button>
 </div>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <script>
-const KEY = 'isbn_bukz_v4';
+// ── Storage ──────────────────────────────────
+const KEY = 'isbn_bukz';
 let items = [];
-let scanner = null;
-let camOn = false;
-let locked = false;
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(items)); }catch(e){} }
+function load(){ try{ const r=localStorage.getItem(KEY); if(r) items=JSON.parse(r); }catch(e){ items=[]; } }
 
-// ── Storage ───────────────────────────────────────────
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
-}
-function load() {
-  try { const r = localStorage.getItem(KEY); if (r) items = JSON.parse(r); } catch(e) { items = []; }
-}
-
-// ── UI ────────────────────────────────────────────────
-function setSt(msg, type) {
+// ── UI helpers ────────────────────────────────
+function setSt(msg,type){
   document.getElementById('stxt').textContent = msg;
   const d = document.getElementById('dot');
-  d.className = 'dot' + (type==='on'?' on':type==='ok'?' ok':type==='err'?' err':'');
+  d.className = 'dot'+(type==='on'?' on':type==='ok'?' ok':type==='err'?' err':'');
 }
-
-function doFlash() {
-  const f = document.getElementById('flash');
+function doFlash(){
+  const f=document.getElementById('flash');
   f.classList.add('on');
-  setTimeout(() => f.classList.remove('on'), 300);
+  setTimeout(()=>f.classList.remove('on'),250);
 }
-
-function addCode(raw) {
-  const code = (raw || '').trim();
-  if (!code) return;
-  items.push({ code: code, id: Date.now() + Math.random() });
-  save();
-  render();
-  setSt('✓ ' + code, 'ok');
-  document.getElementById('manual').value = '';
+function addCode(raw){
+  const code=(raw||'').trim();
+  if(!code) return;
+  items.push({code, id: Date.now()+Math.random()});
+  save(); render();
+  setSt('✓ '+code,'ok');
+  document.getElementById('manual').value='';
   document.getElementById('info').classList.add('on');
   doFlash();
 }
-
-function removeItem(id) {
-  items = items.filter(i => i.id !== id);
-  save(); render();
+function removeItem(id){ items=items.filter(i=>i.id!==id); save(); render(); }
+function clearAll(){
+  if(!items.length) return;
+  if(confirm('¿Borrar todos los códigos?')){ items=[]; save(); render(); setSt('Lista limpiada',''); document.getElementById('info').classList.remove('on'); }
 }
-
-function clearAll() {
-  if (!items.length) return;
-  if (confirm('¿Borrar todos los códigos guardados?')) {
-    items = []; save(); render();
-    setSt('Lista limpiada', '');
-    document.getElementById('info').classList.remove('on');
-  }
-}
-
-function render() {
-  document.getElementById('cnt').textContent = items.length;
-  const list = document.getElementById('list');
-  if (!items.length) { list.innerHTML = '<div id="empty">Sin escaneos aún</div>'; return; }
-  list.innerHTML = items.map((it, i) =>
-    `<div class="item">
-      <div class="n">${i+1}</div>
-      <div class="c">${String(it.code).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
-      <button class="x" onclick="removeItem(${it.id})">✕</button>
-    </div>`
+function render(){
+  document.getElementById('cnt').textContent=items.length;
+  const list=document.getElementById('list');
+  if(!items.length){ list.innerHTML='<div id="empty">Sin escaneos aún</div>'; return; }
+  list.innerHTML=items.map((it,i)=>
+    `<div class="item"><div class="n">${i+1}</div><div class="c">${String(it.code).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div><button class="x" onclick="removeItem(${it.id})">✕</button></div>`
   ).join('');
-  list.scrollTop = list.scrollHeight;
+  list.scrollTop=list.scrollHeight;
 }
-
-function exportCSV() {
-  if (!items.length) { alert('No hay códigos'); return; }
-  const blob = new Blob(['\uFEFF' + items.map(it => `"${it.code}"`).join('\n')], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'isbn_' + new Date().toISOString().slice(0,10) + '.csv';
+function exportCSV(){
+  if(!items.length){ alert('No hay códigos'); return; }
+  const blob=new Blob(['\uFEFF'+items.map(it=>`"${it.code}"`).join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='isbn_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
-  setSt('CSV descargado ✓', 'ok');
+  setSt('CSV descargado ✓','ok');
+}
+function copyCodes(){
+  if(!items.length){ alert('No hay códigos'); return; }
+  const txt=items.map(it=>it.code).join('\n');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>setSt('Copiado ✓','ok')).catch(()=>fallbackCopy(txt));
+  } else { fallbackCopy(txt); }
+}
+function fallbackCopy(txt){
+  const ta=document.createElement('textarea');
+  ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); setSt('Copiado ✓','ok'); }catch(e){ setSt('Error al copiar','err'); }
+  document.body.removeChild(ta);
+}
+function addManual(){ addCode(document.getElementById('manual').value); }
+document.getElementById('manual').addEventListener('keydown',e=>{ if(e.key==='Enter') addManual(); });
+
+// ── Escáner con Quagga ────────────────────────
+let camOn=false, locked=false, stream=null;
+
+function toggleCam(){
+  if(camOn){ stopCam(); return; }
+
+  navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720} }
+  }).then(function(s){
+    stream=s;
+    const vid=document.getElementById('vid');
+    vid.srcObject=s;
+    vid.play();
+    document.getElementById('box').classList.add('on');
+    document.getElementById('cambtn').textContent='⏹ Detener cámara';
+    document.getElementById('cambtn').className='btn red';
+    camOn=true;
+    setSt('Cámara activa — apunta al código','on');
+    startQuagga();
+  }).catch(function(e){
+    setSt('Sin permiso de cámara: '+e.message,'err');
+  });
 }
 
-function copyCodes() {
-  if (!items.length) { alert('No hay códigos'); return; }
-  navigator.clipboard.writeText(items.map(it => it.code).join('\n'))
-    .then(() => setSt('Copiado ✓', 'ok'))
-    .catch(() => {
-      // Fallback para iOS
-      const ta = document.createElement('textarea');
-      ta.value = items.map(it => it.code).join('\n');
-      document.body.appendChild(ta);
-      ta.select(); ta.setSelectionRange(0, 99999);
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      setSt('Copiado ✓', 'ok');
-    });
+function startQuagga(){
+  Quagga.init({
+    inputStream:{
+      type:'LiveStream',
+      target: document.getElementById('vid'),
+      constraints:{ facingMode:'environment' },
+      area:{ top:'0%', right:'0%', left:'0%', bottom:'0%' }
+    },
+    decoder:{
+      readers:['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader','code_39_reader'],
+      multiple:false
+    },
+    locator:{ patchSize:'large', halfSample:false },
+    locate:true,
+    numOfWorkers:2,
+    frequency:20
+  }, function(err){
+    if(err){ setSt('Error Quagga: '+err,'err'); return; }
+    Quagga.start();
+  });
+
+  Quagga.onDetected(function(result){
+    if(locked) return;
+    if(!result||!result.codeResult||!result.codeResult.code) return;
+    locked=true;
+    addCode(result.codeResult.code);
+    let s=3;
+    setSt('⏳ Siguiente en '+s+'s...','on');
+    const iv=setInterval(function(){
+      s--;
+      if(s>0){ setSt('⏳ Siguiente en '+s+'s...','on'); }
+      else{ clearInterval(iv); locked=false; if(camOn) setSt('Listo — apunta al siguiente código','on'); }
+    },1000);
+  });
 }
 
-function addManual() { addCode(document.getElementById('manual').value); }
-document.getElementById('manual').addEventListener('keydown', e => { if (e.key === 'Enter') addManual(); });
-
-// ── Scanner ───────────────────────────────────────────
-function onScanSuccess(code) {
-  if (locked) return;
-  locked = true;
-  addCode(code);
-
-  let s = 3;
-  setSt('⏳ Siguiente en ' + s + 's...', 'on');
-  const iv = setInterval(() => {
-    s--;
-    if (s > 0) {
-      setSt('⏳ Siguiente en ' + s + 's...', 'on');
-    } else {
-      clearInterval(iv);
-      locked = false;
-      if (camOn) setSt('Listo — apunta al siguiente código', 'on');
-    }
-  }, 1000);
+function stopCam(){
+  camOn=false; locked=false;
+  try{ Quagga.stop(); }catch(e){}
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  document.getElementById('vid').srcObject=null;
+  document.getElementById('box').classList.remove('on');
+  document.getElementById('cambtn').textContent='📷 Activar cámara';
+  document.getElementById('cambtn').className='btn';
+  setSt('Cámara detenida','');
 }
 
-async function toggleCam() {
-  if (camOn) {
-    await stopCam();
-    return;
-  }
-
-  document.getElementById('reader-wrap').classList.add('on');
-  document.getElementById('cambtn').textContent = '⏹ Detener cámara';
-  document.getElementById('cambtn').className = 'btn red';
-  camOn = true;
-  setSt('Iniciando cámara...', 'on');
-
-  scanner = new Html5Qrcode('reader');
-
-  const config = {
-    fps: 15,
-    qrbox: { width: 280, height: 180 },
-    aspectRatio: 1.333,
-    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.DATA_MATRIX,
-      Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.CODABAR,
-    ]
-  };
-
-  try {
-    await scanner.start(
-      { facingMode: 'environment' },
-      config,
-      onScanSuccess,
-      () => {} // error silencioso por frame
-    );
-    setSt('Cámara activa — apunta al código', 'on');
-  } catch(e) {
-    setSt('Error: ' + (e || 'no se pudo iniciar'), 'err');
-    await stopCam();
-  }
-}
-
-async function stopCam() {
-  camOn = false;
-  locked = false;
-  try {
-    if (scanner) {
-      await scanner.stop();
-      scanner.clear();
-      scanner = null;
-    }
-  } catch(e) {}
-  document.getElementById('reader-wrap').classList.remove('on');
-  document.getElementById('reader').innerHTML = '';
-  document.getElementById('cambtn').textContent = '📷 Activar cámara';
-  document.getElementById('cambtn').className = 'btn';
-  setSt('Cámara detenida', '');
-}
-
-// ── Init ──────────────────────────────────────────────
-load();
-render();
-if (items.length > 0) {
-  setSt('Se cargaron ' + items.length + ' códigos guardados', 'ok');
+// ── Init ──────────────────────────────────────
+load(); render();
+if(items.length>0){
+  setSt('Se cargaron '+items.length+' códigos guardados','ok');
   document.getElementById('info').classList.add('on');
 } else {
-  setSt('Listo — activa la cámara o ingresa manualmente', '');
+  setSt('Listo — activa la cámara o ingresa manualmente','');
 }
 </script>
 </body>
